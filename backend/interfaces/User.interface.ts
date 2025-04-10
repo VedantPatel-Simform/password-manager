@@ -1,23 +1,23 @@
-interface EncryptedDEK {
-    cipherText: string; // base64-encoded
-    iv: string; // base64-encoded (12 bytes, e.g. 96-bit)
+export interface IEncryptedDEK {
+    cipherText: string;
+    iv: string; // base64 encoded : 12 bytes
 }
 
-interface EncPrivateKey {
-    cipherText: string; // base64-encoded
-    iv: string; // base64-encoded
+export interface IEncPrivateKey {
+    cipherText: string;
+    iv: string;
 }
 
-interface RSA {
-    publicKey: string; // base64-encoded
-    privateKey: EncPrivateKey;
+export interface IRsa {
+    publicKey: string;
+    privateKey: IEncPrivateKey;
 }
 
 export interface IUser {
     name: string;
     email: string;
     password: string;
-    salt: string;
-    encryptedDEK: EncryptedDEK;
-    rsa: RSA;
+    salt: string; // base64 encoded : 16 bytes
+    dek: IEncryptedDEK;
+    rsa: IRsa;
 }

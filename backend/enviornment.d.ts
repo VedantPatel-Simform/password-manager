@@ -7,7 +7,7 @@ declare global {
             JWT_SECRET_KEY: string;
             JWT_EXPIRE_TIME: StringValue;
             NODE_ENV: 'production' | 'development';
-            MONGO_URL: string;
+            MONGO_URI: string;
         }
     }
 }

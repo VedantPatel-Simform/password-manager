@@ -1,13 +1,14 @@
 import { Request, Response } from 'express';
 import expressAsyncHandler from 'express-async-handler';
 import { HTTP_STATUS } from '../constants/http.status.js';
-import { IUser } from '../interfaces/User.interface.js';
+import { IRegister, ILogin } from '../interfaces/Auth.interface.js';
 import { createJwt } from '../utils/jwt.utils.js';
-import { User } from '../models/User.schema.js';
+import { User } from '../models/User.model.js';
 import { ApiError } from '../utils/ApiError.utils.js';
+import argon2 from 'argon2';
 
 export const registerController = expressAsyncHandler(
-    async (req: Request<unknown, unknown, IUser>, res: Response) => {
+    async (req: Request<unknown, unknown, IRegister>, res: Response) => {
         const { name, email, password, salt, encryptedDEK, rsa } = req.body;
 
         const existingUser = await User.findOne({ email });
@@ -19,10 +20,16 @@ export const registerController = expressAsyncHandler(
             );
         }
 
+        // Hash the password with argon2
+        // Argon2id used to protect from GPU and ASIC attacks and currently preferred for high security systems
+        const hashedPassword = await argon2.hash(password, {
+            type: argon2.argon2id,
+        });
+
         const newUser = await User.create({
             name,
             email,
-            password,
+            password: hashedPassword,
             salt,
             dek: encryptedDEK,
             rsa,
@@ -38,30 +45,45 @@ export const registerController = expressAsyncHandler(
 );
 
 export const loginController = expressAsyncHandler(
-    (
-        req: Request<unknown, unknown, { email: string; password: string }>,
-        res: Response
-    ) => {
-        console.log(req.cookies.jwt);
+    async (req: Request<unknown, unknown, ILogin>, res: Response) => {
         const { email, password } = req.body;
+
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            throw new ApiError('Email not found', HTTP_STATUS.NOT_FOUND.code);
+        }
+
+        // Compare hashed password
+        // Argon2id used to protect from GPU and ASIC attacks and currently preferred for high security systems
+        const isPasswordCorrect = await argon2.verify(user.password, password);
+        if (!isPasswordCorrect) {
+            throw new ApiError(
+                'Invalid credentials',
+                HTTP_STATUS.UNAUTHORIZED.code
+            );
+        }
+
         const token = createJwt({
-            email,
-            id: 'userid1',
-            name: 'vedant patel',
+            id: user._id.toString(),
+            email: user.email,
+            name: user.name,
         });
+
         res.cookie('jwt', token, {
-            httpOnly: true, // Prevents client-side JavaScript from accessing the cookie
-            secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
-            maxAge: 24 * 60 * 60 * 1000, // Cookie expiration time (1 day)
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 24 * 60 * 60 * 1000, // 1 day
         });
 
         res.status(HTTP_STATUS.OK.code).json({
-            message: HTTP_STATUS.OK.message,
             success: true,
-            data: {
-                email,
-                password,
+            user: {
+                salt: user.salt,
+                dek: user.dek,
+                rsa: user.rsa,
             },
+            message: 'Login successful',
         });
     }
 );

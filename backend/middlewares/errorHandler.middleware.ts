@@ -10,6 +10,7 @@ export const errorHandler = (
 ) => {
     const status = err instanceof ApiError ? err.statusCode : 500;
     const message = err.message || 'Internal Server Error';
+    console.log(err.stack);
     res.status(status).json({
         success: false,
         message,
