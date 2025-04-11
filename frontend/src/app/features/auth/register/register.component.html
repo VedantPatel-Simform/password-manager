@@ -33,7 +33,8 @@
                     <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
                     <input pInputText [type]="showPassword ? 'text' : 'password'" id="password"
                         formControlName="password" class="w-full mt-1 pr-12"
-                        [ngClass]="{ 'p-invalid': submitted && password?.invalid }" />
+                        [ngClass]="{ 'p-invalid': submitted && password?.invalid }"
+                        placeholder="Minimun in 8 in length" />
                     <button type="button" (click)="showPassword = !showPassword"
                         class="absolute right-3 top-9 text-gray-600 hover:text-black" tabindex="-1">
                         <i [ngClass]="showPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"></i>
@@ -52,12 +53,11 @@
                         Password</label>
                     <input pInputText [type]="showConfirmPassword ? 'text' : 'password'" id="confirmPassword"
                         formControlName="confirmPassword" class="w-full mt-1 pr-12"
+                        placeholder="Enter Same as above ..."
                         [ngClass]="{ 'p-invalid': submitted && (confirmPassword?.invalid || registerForm.errors?.['passwordMismatch']) }" />
                     <button type="button" (click)="showConfirmPassword = !showConfirmPassword"
                         class="absolute right-3 top-9 text-gray-600 hover:text-black" tabindex="-1">
-                        @if(password?.valid && confirmPassword?.touched){
                         <i [ngClass]="showConfirmPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"></i>
-                        }
                     </button>
                     @if (confirmPassword?.touched && (confirmPassword?.value !== password?.value)) {
                     <p class="text-red-500 text-sm mt-1">
@@ -68,12 +68,15 @@
                 <!-- Submit Button -->
                 <div class="flex justify-center">
                     <button pButton type="submit"
-                        class="w-full py-3 px-6 text-white bg-blue-600 hover:bg-blue-700  hover:shadow-lg focus:outline-none rounded-xl font-semibold text-base transition duration-200 ease-in-out cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                        [disabled]="registerForm.invalid">
+                        class="w-full py-3 px-6 rounded-xl font-semibold text-base transition duration-200 ease-in-out text-white focus:outline-none"
+                        [ngClass]="registerForm.invalid 
+                            ? 'bg-blue-400 cursor-default' 
+                            : 'bg-blue-600 hover:bg-blue-700 hover:shadow-lg cursor-pointer'">
                         <i class="pi pi-user-plus mr-2"></i>
                         Register
                     </button>
                 </div>
+
             </form>
         </div>
     </p-card>
