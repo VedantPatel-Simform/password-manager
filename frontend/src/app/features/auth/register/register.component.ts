@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import {
   FormGroup,
   ReactiveFormsModule,
@@ -16,16 +16,22 @@ import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { CardModule } from 'primeng/card';
-import { NgClass, NgIf } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { PasswordModule } from 'primeng/password';
-import { ICryptoData } from '../../../shared/interfaces/crypto-data.interface';
-import { IRegisterData } from '../../../shared/interfaces/auth.interface';
 import {
-  encryptWithBase64Key,
-  generateBase64KeyFromPassword,
-  generateRandomBase64AesKey,
-  generateRSAKeyPair,
-} from '../../../utils/crypto.utils';
+  ErrorResponse,
+  ILoginResponse,
+  IRegisterData,
+  ValidationErrorResponse,
+} from '../../../shared/interfaces/auth.interface';
+import { generateCryptoData } from '../../../utils/crypto.utils';
+import { AuthService } from '../../../core/services/auth/auth.service';
+import { HttpErrorResponse } from '@angular/common/http';
+import {
+  isLoginResponse,
+  isErrorResponse,
+  isValidationErrorResponse,
+} from '../../../utils/authResponse.type.guards';
 
 @Component({
   selector: 'app-register',
@@ -49,6 +55,7 @@ export class RegisterComponent implements OnInit {
   submitted = false;
   showPassword = false;
   showConfirmPassword = false;
+  authService = inject(AuthService);
 
   constructor(private fb: FormBuilder) {}
 
@@ -65,13 +72,28 @@ export class RegisterComponent implements OnInit {
       return;
     }
 
-    console.log('Form Values:', this.registerForm.value);
-    const cryptoData = await this.generateCryptoData(this.password?.value);
+    const cryptoData = await generateCryptoData(this.password?.value);
     const formData: IRegisterData = {
       ...this.registerForm.value,
       ...cryptoData,
     };
-    console.log(formData);
+
+    this.authService.register(formData).subscribe({
+      next: (res) => {
+        console.log(res);
+      },
+      error: (err: HttpErrorResponse) => {
+        const apiError = err.error as ErrorResponse | ValidationErrorResponse;
+        if (isErrorResponse(apiError)) {
+          console.error(' Error:', apiError.message);
+        }
+        if (isValidationErrorResponse(apiError)) {
+          console.error(
+            `Validation failed at ${apiError.path}: ${apiError.msg}`
+          );
+        }
+      },
+    });
   }
 
   private initForm(): void {
@@ -84,28 +106,6 @@ export class RegisterComponent implements OnInit {
       },
       { validators: passwordMatchValidator() }
     );
-  }
-
-  async generateCryptoData(password: string): Promise<ICryptoData> {
-    const { key, salt } = await generateBase64KeyFromPassword(password);
-    const dek = generateRandomBase64AesKey();
-    const encryptedDek = await encryptWithBase64Key(key, dek);
-
-    const rsa = await generateRSAKeyPair();
-
-    const encryptedPrivateKey = await encryptWithBase64Key(
-      dek,
-      rsa.privateKeyPem
-    );
-
-    return {
-      salt,
-      dek: { cipherText: encryptedDek.cipherText, iv: encryptedDek.iv },
-      rsa: {
-        publicKey: rsa.publicKeyPem,
-        privateKey: encryptedPrivateKey,
-      },
-    };
   }
 
   get name() {

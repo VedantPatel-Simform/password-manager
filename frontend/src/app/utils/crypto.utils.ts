@@ -1,3 +1,4 @@
+import { ICryptoData } from '../shared/interfaces/crypto-data.interface';
 export async function generateRSAKeyPair(): Promise<{
   privateKeyPem: string;
   publicKeyPem: string;
@@ -249,4 +250,28 @@ export function calculatePasswordEntropy(password: string): number {
 export function generateRandomBase64AesKey(): string {
   const keyBytes = window.crypto.getRandomValues(new Uint8Array(32)); // 256 bits = 32 bytes
   return arrayBufferToBase64(keyBytes.buffer);
+}
+
+export async function generateCryptoData(
+  password: string
+): Promise<ICryptoData> {
+  const { key, salt } = await generateBase64KeyFromPassword(password);
+  const dek = generateRandomBase64AesKey();
+  const encryptedDek = await encryptWithBase64Key(key, dek);
+
+  const rsa = await generateRSAKeyPair();
+
+  const encryptedPrivateKey = await encryptWithBase64Key(
+    dek,
+    rsa.privateKeyPem
+  );
+
+  return {
+    salt,
+    dek: { cipherText: encryptedDek.cipherText, iv: encryptedDek.iv },
+    rsa: {
+      publicKey: rsa.publicKeyPem,
+      privateKey: encryptedPrivateKey,
+    },
+  };
 }
