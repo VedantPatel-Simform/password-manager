@@ -26,9 +26,10 @@ import {
   decryptWithBase64Key,
   generateBase64KeyFromPasswordAndSalt,
 } from '../../../utils/crypto.utils';
+import { RouterLink } from '@angular/router';
 @Component({
   selector: 'app-login',
-  imports: [ToastModule, ReactiveFormsModule, NgClass],
+  imports: [ToastModule, ReactiveFormsModule, NgClass, RouterLink],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css',
   providers: [MessageService],

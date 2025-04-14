@@ -34,6 +34,7 @@ import {
   isRegisterResponse,
 } from '../../../utils/authResponse.type.guards';
 import { MessageService } from 'primeng/api';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-register',
@@ -49,6 +50,7 @@ import { MessageService } from 'primeng/api';
     NgClass,
     PasswordModule,
     ToastModule,
+    RouterLink,
   ],
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.css'],
