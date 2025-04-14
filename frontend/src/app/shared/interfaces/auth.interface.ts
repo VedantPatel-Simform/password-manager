@@ -21,8 +21,17 @@ export interface ILoginResponse {
   success: boolean;
   user: {
     salt: string;
-    dek: string;
-    rsa: string;
+    dek: {
+      cipherText: string;
+      iv: string;
+    };
+    rsa: {
+      publicKey: string;
+      privateKey: {
+        cipherText: string;
+        iv: string;
+      };
+    };
   };
   message: string;
 }

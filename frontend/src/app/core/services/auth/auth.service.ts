@@ -25,8 +25,8 @@ export class AuthService {
     return this.loggedIn;
   }
 
-  login(data: ILoginData): Observable<IRegisterResponse> {
-    return this.http.post<IRegisterResponse>('/authentication/login', data);
+  login(data: ILoginData): Observable<ILoginResponse> {
+    return this.http.post<ILoginResponse>('/authentication/login', data);
   }
 
   register(data: IRegisterData): Observable<ILoginResponse> {
