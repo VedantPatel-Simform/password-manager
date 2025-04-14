@@ -19,7 +19,7 @@ export interface IRegister {
     password: string;
     confirmPassword: string;
     salt: string; // base64 - encoded 16 bytes
-    encryptedDEK: EncryptedDEK;
+    dek: EncryptedDEK;
     rsa: RSA;
 }
 

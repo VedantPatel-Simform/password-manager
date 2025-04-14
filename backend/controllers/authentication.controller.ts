@@ -9,15 +9,8 @@ import argon2 from 'argon2';
 
 export const registerController = expressAsyncHandler(
     async (req: Request<unknown, unknown, IRegister>, res: Response) => {
-        const {
-            name,
-            email,
-            password,
-            confirmPassword,
-            salt,
-            encryptedDEK,
-            rsa,
-        } = req.body;
+        const { name, email, password, confirmPassword, salt, dek, rsa } =
+            req.body;
 
         if (password !== confirmPassword) {
             throw new ApiError(
@@ -46,7 +39,7 @@ export const registerController = expressAsyncHandler(
             email,
             password: hashedPassword,
             salt,
-            dek: encryptedDEK,
+            dek,
             rsa,
         });
 

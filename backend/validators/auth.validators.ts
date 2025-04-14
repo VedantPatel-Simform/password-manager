@@ -75,7 +75,7 @@ export const registerSchema = z.object({
     password: passwordSchema,
     confirmPassword: passwordSchema,
     salt: saltSchema,
-    encryptedDEK: encryptedDEKSchema,
+    dek: encryptedDEKSchema,
     rsa: rsaSchema,
 });
 

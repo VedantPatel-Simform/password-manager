@@ -18,9 +18,9 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { CardModule } from 'primeng/card';
 import { NgClass } from '@angular/common';
 import { PasswordModule } from 'primeng/password';
+import { ToastModule } from 'primeng/toast';
 import {
   ErrorResponse,
-  ILoginResponse,
   IRegisterData,
   ValidationErrorResponse,
 } from '../../../shared/interfaces/auth.interface';
@@ -31,7 +31,9 @@ import {
   isLoginResponse,
   isErrorResponse,
   isValidationErrorResponse,
+  isRegisterResponse,
 } from '../../../utils/authResponse.type.guards';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-register',
@@ -46,9 +48,11 @@ import {
     CardModule,
     NgClass,
     PasswordModule,
+    ToastModule,
   ],
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.css'],
+  providers: [MessageService],
 })
 export class RegisterComponent implements OnInit {
   registerForm!: FormGroup;
@@ -57,7 +61,10 @@ export class RegisterComponent implements OnInit {
   showConfirmPassword = false;
   authService = inject(AuthService);
 
-  constructor(private fb: FormBuilder) {}
+  constructor(
+    private fb: FormBuilder,
+    private messageService: MessageService
+  ) {}
 
   ngOnInit(): void {
     this.initForm();
@@ -81,16 +88,45 @@ export class RegisterComponent implements OnInit {
     this.authService.register(formData).subscribe({
       next: (res) => {
         console.log(res);
+        if (isRegisterResponse(res)) {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: res.message,
+          });
+          this.submitted = false;
+          this.registerForm.markAsUntouched();
+          this.registerForm.markAsPristine();
+          this.registerForm.reset();
+        } else {
+          console.error('Unexpected response:', res);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Unexpected response from server',
+          });
+        }
       },
       error: (err: HttpErrorResponse) => {
         const apiError = err.error as ErrorResponse | ValidationErrorResponse;
+
         if (isErrorResponse(apiError)) {
           console.error(' Error:', apiError.message);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: apiError.message,
+          });
         }
         if (isValidationErrorResponse(apiError)) {
           console.error(
             `Validation failed at ${apiError.path}: ${apiError.msg}`
           );
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: apiError.msg,
+          });
         }
       },
     });
@@ -100,7 +136,13 @@ export class RegisterComponent implements OnInit {
     this.registerForm = this.fb.group(
       {
         name: ['', [Validators.required, Validators.minLength(4)]],
-        email: ['', [Validators.required, Validators.email]],
+        email: [
+          '',
+          [
+            Validators.required,
+            Validators.pattern(/^[\w\-\.]+@([\w\-]+\.)+[\w\-]{2,4}$/),
+          ],
+        ],
         password: ['', [Validators.required, passwordComplexityValidator()]],
         confirmPassword: ['', [Validators.required]],
       },

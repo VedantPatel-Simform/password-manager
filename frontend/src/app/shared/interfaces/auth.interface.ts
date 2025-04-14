@@ -1,5 +1,4 @@
 import { ICryptoData } from './crypto-data.interface';
-import { IRegister } from '../../../../../backend/interfaces/Auth.interface';
 
 export interface IRegisterData extends ICryptoData {
   name: string;
