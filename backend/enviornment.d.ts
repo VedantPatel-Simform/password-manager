@@ -8,6 +8,7 @@ declare global {
             JWT_EXPIRE_TIME: StringValue;
             NODE_ENV: 'production' | 'development';
             MONGO_URI: string;
+            CORS_ORIGIN: string;
         }
     }
 }
