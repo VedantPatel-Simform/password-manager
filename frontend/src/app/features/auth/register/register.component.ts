@@ -16,7 +16,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { CardModule } from 'primeng/card';
-import { NgClass } from '@angular/common';
+import { NgClass, NgIf } from '@angular/common';
 import { PasswordModule } from 'primeng/password';
 import { ICryptoData } from '../../../shared/interfaces/crypto-data.interface';
 import { IRegisterData } from '../../../shared/interfaces/auth.interface';
