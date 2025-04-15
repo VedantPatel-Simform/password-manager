@@ -1,4 +1,10 @@
-import { AfterViewInit, Component, inject, OnInit } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  inject,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
 import {
   FormGroup,
   ReactiveFormsModule,
@@ -20,30 +26,39 @@ import {
   isErrorResponse,
   isValidationErrorResponse,
 } from '../../../utils/authResponse.type.guards';
-import { MessageService } from 'primeng/api';
 import { ILoginData } from '../../../shared/interfaces/auth.interface';
 import {
   decryptWithBase64Key,
   generateBase64KeyFromPasswordAndSalt,
 } from '../../../utils/crypto.utils';
 import { Router, RouterLink } from '@angular/router';
+import { ToastService } from '../../../core/services/toast/toast.service';
+import { ToastComponent } from '../../../shared/components/toast/toast.component';
 @Component({
   selector: 'app-login',
-  imports: [ToastModule, ReactiveFormsModule, NgClass, RouterLink],
+  imports: [
+    ToastModule,
+    ReactiveFormsModule,
+    NgClass,
+    RouterLink,
+    ToastComponent,
+  ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css',
-  providers: [MessageService],
 })
-export class LoginComponent implements OnInit, AfterViewInit {
+export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   showPassword = false;
   loginForm!: FormGroup;
   submitted = false;
   router = inject(Router);
+
+  // Inject ToastService instead of MessageService
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private messageService: MessageService
+    private toastService: ToastService // Inject ToastService
   ) {}
+
   ngOnInit(): void {
     this.initForm();
   }
@@ -51,11 +66,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
     if (this.authService.isRegistered()) {
       console.log('is registered');
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Success',
-        detail: 'Successfully Registered',
-      });
+      this.toastService.showSuccess('success', 'Successfully Registered');
     }
   }
 
@@ -63,7 +74,6 @@ export class LoginComponent implements OnInit, AfterViewInit {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
       console.log('Form Invalid');
-      // this.submitted = true;
       return;
     }
     const formData: ILoginData = this.loginForm.value;
@@ -72,11 +82,10 @@ export class LoginComponent implements OnInit, AfterViewInit {
         if (isLoginResponse(res)) {
           this.authService.setLoggedIn(true);
           console.log('Login successful', res.user);
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Success',
-            detail: res.message,
-          });
+
+          // Show success message using ToastService
+          this.toastService.showSuccess('success', res.message);
+
           const userEncKey = await generateBase64KeyFromPasswordAndSalt(
             this.password?.value,
             res.user.salt
@@ -92,29 +101,23 @@ export class LoginComponent implements OnInit, AfterViewInit {
           this.router.navigate(['/dashboard']);
         } else {
           console.error('Unexpected response format:', res);
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Unexpected response from server',
-          });
+          // Show error message using ToastService
+          this.toastService.showError(
+            'error',
+            'Unexpected response from server'
+          );
         }
       },
       error: (error: HttpErrorResponse) => {
         const apiError = error.error as ErrorResponse | ValidationErrorResponse;
         if (isErrorResponse(apiError)) {
           console.error('Login failed:', error.error);
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: `${apiError.statusCode}: ${apiError.message}`,
-          });
+          // Show error message using ToastService
+          this.toastService.showError('error', apiError.message);
         } else if (isValidationErrorResponse(apiError)) {
           console.error('Validation error:', apiError);
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Validation Error',
-            detail: `${apiError.error}: ${apiError.msg}`,
-          });
+          // Show validation error message using ToastService
+          this.toastService.showError('error', apiError.msg);
         }
       },
     });
@@ -133,5 +136,9 @@ export class LoginComponent implements OnInit, AfterViewInit {
 
   get password() {
     return this.loginForm.get('password');
+  }
+
+  ngOnDestroy(): void {
+    this.toastService.clear();
   }
 }

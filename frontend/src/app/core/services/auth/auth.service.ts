@@ -31,6 +31,7 @@ export class AuthService {
   }
 
   isRegistered() {
+    console.log('Registered method called');
     return this.registered;
   }
 

@@ -35,6 +35,8 @@ import {
 } from '../../../utils/authResponse.type.guards';
 import { MessageService } from 'primeng/api';
 import { Router, RouterLink } from '@angular/router';
+import { ToastService } from '../../../core/services/toast/toast.service';
+import { ToastComponent } from '../../../shared/components/toast/toast.component';
 
 @Component({
   selector: 'app-register',
@@ -51,12 +53,12 @@ import { Router, RouterLink } from '@angular/router';
     PasswordModule,
     ToastModule,
     RouterLink,
+    ToastComponent,
   ],
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.css'],
-  providers: [MessageService],
 })
-export class RegisterComponent implements OnInit {
+export class RegisterComponent implements OnInit, OnDestroy {
   registerForm!: FormGroup;
   submitted = false;
   showPassword = false;
@@ -64,10 +66,7 @@ export class RegisterComponent implements OnInit {
   authService = inject(AuthService);
   router = inject(Router);
 
-  constructor(
-    private fb: FormBuilder,
-    private messageService: MessageService
-  ) {}
+  constructor(private fb: FormBuilder, private toast: ToastService) {}
 
   ngOnInit(): void {
     this.initForm();
@@ -99,21 +98,13 @@ export class RegisterComponent implements OnInit {
       next: (res) => {
         console.log(res);
         if (isRegisterResponse(res)) {
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Success',
-            detail: res.message,
-          });
+          this.toast.showSuccess('Success', res.message);
           this.resetForm();
           this.authService.setRegistered(true);
           this.router.navigate(['/login']);
         } else {
           console.error('Unexpected response:', res);
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Unexpected response from server',
-          });
+          this.toast.showError('Error', 'Unexpected response from server');
         }
       },
       error: (err: HttpErrorResponse) => {
@@ -121,21 +112,13 @@ export class RegisterComponent implements OnInit {
 
         if (isErrorResponse(apiError)) {
           console.error(' Error:', apiError.message);
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: apiError.message,
-          });
+          this.toast.showError('Error', apiError.message);
         }
         if (isValidationErrorResponse(apiError)) {
           console.error(
             `Validation failed at ${apiError.path}: ${apiError.msg}`
           );
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: apiError.msg,
-          });
+          this.toast.showError('Error', apiError.msg);
         }
         this.resetForm();
       },
@@ -171,5 +154,9 @@ export class RegisterComponent implements OnInit {
   }
   get confirmPassword() {
     return this.registerForm.get('confirmPassword');
+  }
+
+  ngOnDestroy(): void {
+    this.toast.clear();
   }
 }
