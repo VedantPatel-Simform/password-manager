@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import {
   FormGroup,
   ReactiveFormsModule,
@@ -34,7 +34,7 @@ import {
   isRegisterResponse,
 } from '../../../utils/authResponse.type.guards';
 import { MessageService } from 'primeng/api';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-register',
@@ -62,6 +62,7 @@ export class RegisterComponent implements OnInit {
   showPassword = false;
   showConfirmPassword = false;
   authService = inject(AuthService);
+  router = inject(Router);
 
   constructor(
     private fb: FormBuilder,
@@ -70,6 +71,13 @@ export class RegisterComponent implements OnInit {
 
   ngOnInit(): void {
     this.initForm();
+  }
+
+  resetForm() {
+    this.submitted = false;
+    this.registerForm.markAsUntouched();
+    this.registerForm.markAsPristine();
+    this.registerForm.reset();
   }
 
   async onSubmit(): Promise<void> {
@@ -96,10 +104,9 @@ export class RegisterComponent implements OnInit {
             summary: 'Success',
             detail: res.message,
           });
-          this.submitted = false;
-          this.registerForm.markAsUntouched();
-          this.registerForm.markAsPristine();
-          this.registerForm.reset();
+          this.resetForm();
+          this.authService.setRegistered(true);
+          this.router.navigate(['/login']);
         } else {
           console.error('Unexpected response:', res);
           this.messageService.add({
@@ -130,6 +137,7 @@ export class RegisterComponent implements OnInit {
             detail: apiError.msg,
           });
         }
+        this.resetForm();
       },
     });
   }

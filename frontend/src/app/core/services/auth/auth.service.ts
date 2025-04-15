@@ -14,7 +14,8 @@ import { Observable } from 'rxjs';
   providedIn: 'root',
 })
 export class AuthService {
-  loggedIn: boolean = false;
+  private loggedIn: boolean = false;
+  private registered: boolean = false;
   constructor(private http: HttpClient) {}
 
   setLoggedIn(value: boolean) {
@@ -23,6 +24,14 @@ export class AuthService {
 
   isLoggedIn() {
     return this.loggedIn;
+  }
+
+  setRegistered(value: boolean) {
+    this.registered = value;
+  }
+
+  isRegistered() {
+    return this.registered;
   }
 
   login(data: ILoginData): Observable<ILoginResponse> {

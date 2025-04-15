@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, inject, OnInit } from '@angular/core';
 import {
   FormGroup,
   ReactiveFormsModule,
@@ -26,7 +26,7 @@ import {
   decryptWithBase64Key,
   generateBase64KeyFromPasswordAndSalt,
 } from '../../../utils/crypto.utils';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 @Component({
   selector: 'app-login',
   imports: [ToastModule, ReactiveFormsModule, NgClass, RouterLink],
@@ -34,10 +34,11 @@ import { RouterLink } from '@angular/router';
   styleUrl: './login.component.css',
   providers: [MessageService],
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent implements OnInit, AfterViewInit {
   showPassword = false;
   loginForm!: FormGroup;
   submitted = false;
+  router = inject(Router);
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
@@ -45,6 +46,17 @@ export class LoginComponent implements OnInit {
   ) {}
   ngOnInit(): void {
     this.initForm();
+  }
+
+  ngAfterViewInit(): void {
+    if (this.authService.isRegistered()) {
+      console.log('is registered');
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'Successfully Registered',
+      });
+    }
   }
 
   onSubmit() {
@@ -77,6 +89,7 @@ export class LoginComponent implements OnInit {
           );
           console.log('User Public RSA:', res.user.rsa.publicKey);
           console.log('User Private RSA:', userPrivateKey);
+          this.router.navigate(['/dashboard']);
         } else {
           console.error('Unexpected response format:', res);
           this.messageService.add({
