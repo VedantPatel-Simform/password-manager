@@ -43,6 +43,6 @@ export interface ErrorResponse {
 
 export interface ValidationErrorResponse {
   error: string;
-  msg: string;
+  message: string;
   path: string;
 }

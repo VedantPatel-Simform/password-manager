@@ -9,6 +9,7 @@ declare global {
             NODE_ENV: 'production' | 'development';
             MONGO_URI: string;
             CORS_ORIGIN: string;
+            PASSWORD_BREACH_ENDPOINT: string;
         }
     }
 }

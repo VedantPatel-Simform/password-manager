@@ -28,16 +28,14 @@ import { generateCryptoData } from '../../../utils/crypto.utils';
 import { AuthService } from '../../../core/services/auth/auth.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import {
-  isLoginResponse,
   isErrorResponse,
   isValidationErrorResponse,
   isRegisterResponse,
 } from '../../../utils/authResponse.type.guards';
-import { MessageService } from 'primeng/api';
 import { Router, RouterLink } from '@angular/router';
 import { ToastService } from '../../../core/services/toast/toast.service';
 import { ToastComponent } from '../../../shared/components/toast/toast.component';
-
+import { HTTP_STATUS } from '../../../core/constants/http.status';
 @Component({
   selector: 'app-register',
   standalone: true,
@@ -112,13 +110,17 @@ export class RegisterComponent implements OnInit, OnDestroy {
 
         if (isErrorResponse(apiError)) {
           console.error(' Error:', apiError.message);
-          this.toast.showError('Error', apiError.message);
+          if (err.status === HTTP_STATUS.BAD_REQUEST.code) {
+            this.toast.showWarn('Warning', apiError.message);
+          } else {
+            this.toast.showError('Error', apiError.message);
+          }
         }
         if (isValidationErrorResponse(apiError)) {
           console.error(
-            `Validation failed at ${apiError.path}: ${apiError.msg}`
+            `Validation failed at ${apiError.path}: ${apiError.message}`
           );
-          this.toast.showError('Error', apiError.msg);
+          this.toast.showError('Error', apiError.message);
         }
         this.resetForm();
       },

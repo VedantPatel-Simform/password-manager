@@ -117,7 +117,7 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
         } else if (isValidationErrorResponse(apiError)) {
           console.error('Validation error:', apiError);
           // Show validation error message using ToastService
-          this.toastService.showError('error', apiError.msg);
+          this.toastService.showError('error', apiError.message);
         }
       },
     });
