@@ -34,6 +34,7 @@ import {
 import { Router, RouterLink } from '@angular/router';
 import { ToastService } from '../../../core/services/toast/toast.service';
 import { ToastComponent } from '../../../shared/components/toast/toast.component';
+import { KeyStorageService } from '../../../core/services/User/key-storage.service';
 @Component({
   selector: 'app-login',
   imports: [
@@ -51,6 +52,7 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   loginForm!: FormGroup;
   submitted = false;
   router = inject(Router);
+  keyService = inject(KeyStorageService);
 
   // Inject ToastService instead of MessageService
   constructor(
@@ -80,7 +82,6 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
     this.authService.login(formData).subscribe({
       next: async (res) => {
         if (isLoginResponse(res)) {
-          this.authService.setLoggedIn(true);
           console.log('Login successful', res.user);
 
           // Show success message using ToastService
@@ -96,8 +97,13 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
             userDek,
             res.user.rsa.privateKey
           );
-          console.log('User Public RSA:', res.user.rsa.publicKey);
-          console.log('User Private RSA:', userPrivateKey);
+
+          this.authService.setLoggedIn(true);
+
+          this.keyService.setDekKey(userDek);
+          this.keyService.setEncryptionKey(userEncKey);
+          this.keyService.setPrivateKey(userPrivateKey);
+          this.keyService.setPublicKey(res.user.rsa.publicKey);
           this.router.navigate(['/dashboard']);
         } else {
           console.error('Unexpected response format:', res);

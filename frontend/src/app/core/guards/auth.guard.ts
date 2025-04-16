@@ -1,8 +1,8 @@
 import { inject } from '@angular/core';
 import {
-  ActivatedRouteSnapshot,
   CanActivateFn,
   Router,
+  ActivatedRouteSnapshot,
   RouterStateSnapshot,
   UrlTree,
 } from '@angular/router';
@@ -16,21 +16,25 @@ export const authGuard: CanActivateFn = (
   const router = inject(Router);
 
   const isLoggedIn = auth.isLoggedIn();
-  const currentPath = route.url[0]?.path;
+  const url = state.url;
 
-  console.log('Current Path:', currentPath);
+  console.log('Navigating to:', url);
   console.log('Is Logged In:', isLoggedIn);
 
-  // If logged in and trying to access login or register, redirect to dashboard
-  if (isLoggedIn && (currentPath === 'login' || currentPath === 'register')) {
+  // Public routes (include root path)
+  const isPublicRoute =
+    url === '/' ||
+    url === '' ||
+    url.includes('/login') ||
+    url.includes('/register');
+
+  if (isLoggedIn && isPublicRoute) {
     return router.createUrlTree(['/dashboard']);
   }
 
-  // If not logged in and trying to access a protected route, redirect to login
-  if (!isLoggedIn && currentPath !== 'login' && currentPath !== 'register') {
+  if (!isLoggedIn && !isPublicRoute) {
     return router.createUrlTree(['/login']);
   }
 
-  // Otherwise, allow access
   return true;
 };

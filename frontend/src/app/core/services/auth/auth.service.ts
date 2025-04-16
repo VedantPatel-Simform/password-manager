@@ -11,30 +11,30 @@ import { Observable } from 'rxjs';
   providedIn: 'root',
 })
 export class AuthService {
-  private loggedInKey = 'loggedIn'; // Key for sessionStorage
-  private registeredKey = 'registered'; // Key for sessionStorage
+  private loggedInKey = 'loggedIn'; // Key for localStorage
+  private registeredKey = 'registered'; // Key for localStorage
 
   constructor(private http: HttpClient) {}
 
-  // Store login status in sessionStorage
+  // Store login status in localStorage
   setLoggedIn(value: boolean): void {
-    sessionStorage.setItem(this.loggedInKey, JSON.stringify(value));
+    localStorage.setItem(this.loggedInKey, JSON.stringify(value));
   }
 
-  // Retrieve login status from sessionStorage
+  // Retrieve login status from localStorage
   isLoggedIn(): boolean {
-    const value = sessionStorage.getItem(this.loggedInKey);
+    const value = localStorage.getItem(this.loggedInKey);
     return value ? JSON.parse(value) : false; // Default to false if not set
   }
 
-  // Store registered status in sessionStorage
+  // Store registered status in localStorage
   setRegistered(value: boolean): void {
-    sessionStorage.setItem(this.registeredKey, JSON.stringify(value));
+    localStorage.setItem(this.registeredKey, JSON.stringify(value));
   }
 
-  // Retrieve registered status from sessionStorage
+  // Retrieve registered status from localStorage
   isRegistered(): boolean {
-    const value = sessionStorage.getItem(this.registeredKey);
+    const value = localStorage.getItem(this.registeredKey);
     console.log('Registered method called');
     return value ? JSON.parse(value) : false; // Default to false if not set
   }
