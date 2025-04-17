@@ -7,22 +7,20 @@ import {
 
 export function isLoginResponse(obj: any): obj is ILoginResponse {
   return (
+    obj &&
     typeof obj === 'object' &&
-    obj !== null &&
     typeof obj.success === 'boolean' &&
     typeof obj.message === 'string' &&
-    typeof obj.user === 'object' &&
-    obj.user !== null &&
+    obj.user &&
+    typeof obj.user.name === 'string' &&
+    typeof obj.user.email === 'string' &&
     typeof obj.user.salt === 'string' &&
-    typeof obj.user.dek === 'object' &&
-    obj.user.dek !== null &&
+    obj.user.dek &&
     typeof obj.user.dek.cipherText === 'string' &&
     typeof obj.user.dek.iv === 'string' &&
-    typeof obj.user.rsa === 'object' &&
-    obj.user.rsa !== null &&
+    obj.user.rsa &&
     typeof obj.user.rsa.publicKey === 'string' &&
-    typeof obj.user.rsa.privateKey === 'object' &&
-    obj.user.rsa.privateKey !== null &&
+    obj.user.rsa.privateKey &&
     typeof obj.user.rsa.privateKey.cipherText === 'string' &&
     typeof obj.user.rsa.privateKey.iv === 'string'
   );

@@ -89,7 +89,11 @@
                 <button (click)="toggleSidebar()" class="md:hidden text-blue-600 focus:outline-none text-2xl">
                     <i class="pi pi-bars"></i>
                 </button>
-                <h2 class="text-xl font-semibold text-blue-700 tracking-tight">Welcome back 👋</h2>
+                <div class="text-left space-y-1">
+                    <h2 class="text-2xl font-bold text-blue-400 tracking-tight">
+                        Welcome back, <span class="text-blue-800">{{ userDetails.getCurrentUser()?.name }}</span> 👋
+                    </h2>
+                </div>
             </div>
             <a routerLink="/dashboard/profile"
                 class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-all shadow-sm">

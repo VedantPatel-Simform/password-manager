@@ -8,6 +8,8 @@ import {
 } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { of, map, catchError } from 'rxjs';
+import { KeyStorageService } from '../services/User/key-storage.service';
+import { UserDetailsService } from '../services/User/user-details.service';
 
 export const authGuard: CanActivateFn = (
   route: ActivatedRouteSnapshot,
@@ -16,7 +18,8 @@ export const authGuard: CanActivateFn = (
   const http = inject(HttpClient);
   const router = inject(Router);
   const url = state.url;
-
+  const keyService = inject(KeyStorageService);
+  const userService = inject(UserDetailsService);
   // Match base public routes and any of their children
   const isPublicRoute =
     url.startsWith('/login') || url.startsWith('/register') || url === '/';
@@ -40,7 +43,8 @@ export const authGuard: CanActivateFn = (
       }),
       catchError((err) => {
         console.warn('Auth Guard | Session check failed:', err);
-
+        keyService.clearAllKeys();
+        userService.clearUserDetails();
         // On error, assume not logged in and restrict private routes
         if (!isPublicRoute) {
           return of(router.createUrlTree(['/login']));

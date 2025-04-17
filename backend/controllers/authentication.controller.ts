@@ -18,21 +18,21 @@ export const registerController = expressAsyncHandler(
             );
         }
 
-        const response = await fetch(
-            `${process.env.PASSWORD_BREACH_ENDPOINT}/check?password=${encodeURIComponent(password)}`
-        );
+        // const response = await fetch(
+        //     `${process.env.PASSWORD_BREACH_ENDPOINT}/check?password=${encodeURIComponent(password)}`
+        // );
 
-        const data = (await response.json()) as {
-            success: boolean;
-            breached: boolean;
-        };
+        // const data = (await response.json()) as {
+        //     success: boolean;
+        //     breached: boolean;
+        // };
 
-        if (data.breached) {
-            throw new ApiError(
-                'This password has been exposed in a data breach. Please choose a different one.',
-                HTTP_STATUS.BAD_REQUEST.code
-            );
-        }
+        // if (data.breached) {
+        //     throw new ApiError(
+        //         'This password has been exposed in a data breach. Please choose a different one.',
+        //         HTTP_STATUS.BAD_REQUEST.code
+        //     );
+        // }
 
         const existingUser = await User.findOne({ email });
 
@@ -102,6 +102,8 @@ export const loginController = expressAsyncHandler(
         res.status(HTTP_STATUS.OK.code).json({
             success: true,
             user: {
+                name: user.name,
+                email: user.email,
                 salt: user.salt,
                 dek: user.dek,
                 rsa: user.rsa,

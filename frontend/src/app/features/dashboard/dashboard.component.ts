@@ -17,6 +17,7 @@ import { AuthService } from '../../core/services/auth/auth.service';
 import { ToastService } from '../../core/services/toast/toast.service';
 import { ToastComponent } from '../../shared/components/toast/toast.component';
 import { DrawerModule } from 'primeng/drawer'; // Import Drawer module
+import { UserDetailsService } from '../../core/services/User/user-details.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -37,6 +38,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   authService = inject(AuthService);
   toastService = inject(ToastService);
   router = inject(Router);
+  userDetails = inject(UserDetailsService);
 
   mobileSidebarOpen = false; // This controls the mobile drawer state
   visible: boolean = false; // For controlling the mobile drawer visibility
