@@ -16,6 +16,7 @@ import { KeyStorageService } from '../../core/services/User/key-storage.service'
 import { AuthService } from '../../core/services/auth/auth.service';
 import { ToastService } from '../../core/services/toast/toast.service';
 import { ToastComponent } from '../../shared/components/toast/toast.component';
+import { DrawerModule } from 'primeng/drawer'; // Import Drawer module
 
 @Component({
   selector: 'app-dashboard',
@@ -26,9 +27,10 @@ import { ToastComponent } from '../../shared/components/toast/toast.component';
     RouterModule,
     AccordionModule,
     ToastComponent,
+    DrawerModule, // Add Drawer module here
   ],
   templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.css',
+  styleUrls: ['./dashboard.component.css'],
 })
 export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   keyService = inject(KeyStorageService);
@@ -36,14 +38,27 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   toastService = inject(ToastService);
   router = inject(Router);
 
+  mobileSidebarOpen = false; // This controls the mobile drawer state
+  visible: boolean = false; // For controlling the mobile drawer visibility
+
+  // On Init lifecycle hook
   ngOnInit(): void {}
 
+  // Toggle mobile sidebar (drawer)
+  toggleSidebar() {
+    this.mobileSidebarOpen = !this.mobileSidebarOpen;
+    this.visible = this.mobileSidebarOpen;
+  }
+
+  // On AfterViewInit lifecycle hook (for showing success toast after login)
   ngAfterViewInit(): void {
     if (this.authService.getComingFrom() === 'login') {
       this.toastService.clear();
       this.toastService.showSuccess('Success', 'Successfully Logged in');
     }
   }
+
+  // Logout functionality
   logout() {
     this.keyService.clearAllKeys();
     this.authService.logout().subscribe((res) => {
@@ -53,6 +68,8 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     });
   }
+
+  // Define menu items for the sidebar
   menuItems = [
     {
       label: 'Generate Password',
@@ -103,6 +120,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     },
   ];
 
+  // On Destroy lifecycle hook
   ngOnDestroy(): void {
     this.toastService.clear();
   }

@@ -6,7 +6,6 @@ import {
   RouterStateSnapshot,
   UrlTree,
 } from '@angular/router';
-import { AuthService } from '../services/auth/auth.service';
 import { HttpClient } from '@angular/common/http';
 import { of, map, catchError } from 'rxjs';
 
@@ -16,7 +15,6 @@ export const authGuard: CanActivateFn = (
 ) => {
   const http = inject(HttpClient);
   const router = inject(Router);
-  const auth = inject(AuthService);
   const url = state.url;
 
   // Match base public routes and any of their children
