@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import expressAsyncHandler from 'express-async-handler';
 import { HTTP_STATUS } from '../constants/http.status.js';
 import { IRegister, ILogin } from '../interfaces/Auth.interface.js';
-import { createJwt } from '../utils/jwt.utils.js';
+import { createJwt, verifyJwt } from '../utils/jwt.utils.js';
 import { User } from '../models/User.model.js';
 import { ApiError } from '../utils/ApiError.utils.js';
 import argon2 from 'argon2';
@@ -107,6 +107,43 @@ export const loginController = expressAsyncHandler(
                 rsa: user.rsa,
             },
             message: 'Login successful',
+        });
+    }
+);
+
+export const checkSessionController = expressAsyncHandler(
+    (req: Request, res: Response) => {
+        const token = req.cookies.jwt as string;
+        console.log('inside checksession');
+        if (!token || typeof token !== 'string') {
+            throw new ApiError(
+                'Authentication required',
+                HTTP_STATUS.UNAUTHORIZED.code
+            );
+        }
+        try {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const decoded = verifyJwt(token);
+            res.status(200).json({
+                success: true,
+                message: 'Verified User',
+            });
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (err) {
+            res.status(HTTP_STATUS.UNAUTHORIZED.code).json({
+                success: false,
+                message: 'Unauthorized User',
+            });
+        }
+    }
+);
+
+export const logoutController = expressAsyncHandler(
+    (req: Request, res: Response) => {
+        res.clearCookie('jwt');
+        res.status(HTTP_STATUS.OK.code).json({
+            success: true,
+            message: 'Logout Successful',
         });
     }
 );

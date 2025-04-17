@@ -98,7 +98,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
         if (isRegisterResponse(res)) {
           this.toast.showSuccess('Success', res.message);
           this.resetForm();
-          this.authService.setRegistered(true);
+          this.authService.setComingFrom('register');
           this.router.navigate(['/login']);
         } else {
           console.error('Unexpected response:', res);

@@ -66,9 +66,10 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    if (this.authService.isRegistered()) {
-      console.log('is registered');
-      this.toastService.showSuccess('success', 'Successfully Registered');
+    if (this.authService.getComingFrom() === 'register') {
+      this.toastService.showSuccess('Success', 'Successfully Registered');
+    } else if (this.authService.getComingFrom() === 'dashboard') {
+      this.toastService.showSuccess('Success', 'Successfully Logged out');
     }
   }
 
@@ -98,12 +99,11 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
             res.user.rsa.privateKey
           );
 
-          this.authService.setLoggedIn(true);
-
           this.keyService.setDekKey(userDek);
           this.keyService.setEncryptionKey(userEncKey);
           this.keyService.setPrivateKey(userPrivateKey);
           this.keyService.setPublicKey(res.user.rsa.publicKey);
+          this.authService.setComingFrom('login');
           this.router.navigate(['/dashboard']);
         } else {
           console.error('Unexpected response format:', res);
