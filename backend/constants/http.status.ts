@@ -33,5 +33,3 @@ export const HTTP_STATUS = {
     SERVICE_UNAVAILABLE: { code: 503, message: 'Service Unavailable' },
     GATEWAY_TIMEOUT: { code: 504, message: 'Gateway Timeout' },
 } as const;
-
-export type HttpStatusKey = keyof typeof HTTP_STATUS;

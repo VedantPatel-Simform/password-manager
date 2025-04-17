@@ -6,10 +6,33 @@ import { createJwt } from '../utils/jwt.utils.js';
 import { User } from '../models/User.model.js';
 import { ApiError } from '../utils/ApiError.utils.js';
 import argon2 from 'argon2';
-
 export const registerController = expressAsyncHandler(
     async (req: Request<unknown, unknown, IRegister>, res: Response) => {
-        const { name, email, password, salt, encryptedDEK, rsa } = req.body;
+        const { name, email, password, confirmPassword, salt, dek, rsa } =
+            req.body;
+
+        if (password !== confirmPassword) {
+            throw new ApiError(
+                "Password's do not match",
+                HTTP_STATUS.BAD_REQUEST.code
+            );
+        }
+
+        const response = await fetch(
+            `${process.env.PASSWORD_BREACH_ENDPOINT}/check?password=${encodeURIComponent(password)}`
+        );
+
+        const data = (await response.json()) as {
+            success: boolean;
+            breached: boolean;
+        };
+
+        if (data.breached) {
+            throw new ApiError(
+                'This password has been exposed in a data breach. Please choose a different one.',
+                HTTP_STATUS.BAD_REQUEST.code
+            );
+        }
 
         const existingUser = await User.findOne({ email });
 
@@ -31,7 +54,7 @@ export const registerController = expressAsyncHandler(
             email,
             password: hashedPassword,
             salt,
-            dek: encryptedDEK,
+            dek,
             rsa,
         });
 

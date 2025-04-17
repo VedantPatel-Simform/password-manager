@@ -73,8 +73,9 @@ export const registerSchema = z.object({
     name: nameSchema,
     email: emailSchema,
     password: passwordSchema,
+    confirmPassword: passwordSchema,
     salt: saltSchema,
-    encryptedDEK: encryptedDEKSchema,
+    dek: encryptedDEKSchema,
     rsa: rsaSchema,
 });
 

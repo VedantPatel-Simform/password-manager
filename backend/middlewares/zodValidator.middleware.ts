@@ -11,7 +11,7 @@ export const validate =
             const firstError = result.error.errors[0];
             res.status(HTTP_STATUS.BAD_REQUEST.code).json({
                 error: 'Validation failed',
-                msg: firstError.message,
+                message: firstError.message,
                 path: firstError.path.join('.'),
             });
             return;

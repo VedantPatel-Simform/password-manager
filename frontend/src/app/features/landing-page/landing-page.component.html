@@ -1,0 +1,94 @@
+<div class="min-h-screen bg-gradient-to-b from-blue-50 to-white flex flex-col justify-between">
+
+    <!-- Navbar -->
+    <nav class="bg-white shadow-md py-4 px-8 fixed w-full z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <!-- Project Name -->
+            <div class="text-2xl font-extrabold text-blue-700 tracking-tight">
+                PassShield
+                <span class="text-sm font-medium text-gray-500 ml-1">| Secure & Simple</span>
+            </div>
+
+            <!-- Login / Register Buttons -->
+            <div class="flex gap-4">
+                <a routerLink="/login"
+                    class="bg-transparent border border-blue-600 text-blue-600 py-2 px-5 rounded-lg hover:bg-blue-50 transition">
+                    Login
+                </a>
+                <a routerLink="/register"
+                    class="bg-blue-600 text-white py-2 px-5 rounded-lg shadow hover:bg-blue-700 transition">
+                    Register
+                </a>
+            </div>
+        </div>
+    </nav>
+
+
+    <!-- Hero Section -->
+    <section
+        class="relative flex flex-col items-center justify-center py-24 bg-gradient-to-r from-blue-700 to-blue-300 to-blue-500 text-center overflow-hidden">
+
+        <!-- Overlay Pattern (optional) -->
+        <div class="absolute inset-0 bg-blue-200 opacity-20 mix-blend-overlay"></div>
+
+        <!-- Hero Content -->
+        <div class="relative z-10 px-8">
+            <h1 class="text-5xl font-extrabold text-white leading-tight mb-6 max-w-3xl mx-auto">
+                Secure Your Passwords, Secure Your World
+            </h1>
+            <p class="text-lg text-white mb-8 max-w-2xl mx-auto">
+                With PassShield, your data is always safe and secure with zero-knowledge architecture. You control your
+                passwords, your privacy, and your security.
+            </p>
+            <a routerLink="/register"
+                class="inline-block bg-white text-blue-600 text-lg font-semibold py-4 px-10 rounded-lg shadow-xl hover:bg-gray-200 transform hover:scale-105 transition duration-300 ease-in-out">
+                Get Started
+            </a>
+        </div>
+    </section>
+
+
+
+    <!-- Features Section -->
+    <section id="features" class="py-12 bg-white text-center">
+        <h2 class="text-3xl font-extrabold text-blue-700 mb-8">Features</h2>
+        <div class="container mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12 px-6">
+            <!-- Feature 1 -->
+            <div class="p-6 bg-blue-50 rounded-xl shadow-lg hover:bg-blue-100 transition duration-300 ease-in-out">
+                <div class="mb-4">
+                    <i class="pi pi-lock text-4xl text-blue-600"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-blue-700 mb-4">Zero-Knowledge Encryption</h3>
+                <p class="text-gray-600">Your data is encrypted and stored in a way that only you can access. No one
+                    else, not even us, has access to your passwords.</p>
+            </div>
+
+            <!-- Feature 2 -->
+            <div class="p-6 bg-blue-50 rounded-xl shadow-lg hover:bg-blue-100 transition duration-300 ease-in-out">
+                <div class="mb-4">
+                    <i class="pi pi-shield text-4xl text-blue-600"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-blue-700 mb-4">End-to-End Security</h3>
+                <p class="text-gray-600">With advanced encryption, your passwords are protected from start to finish,
+                    ensuring your privacy and security at all times.</p>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="p-6 bg-blue-50 rounded-xl shadow-lg hover:bg-blue-100 transition duration-300 ease-in-out">
+                <div class="mb-4">
+                    <i class="pi pi-cog text-4xl text-blue-600"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-blue-700 mb-4">Automatic Password Generation</h3>
+                <p class="text-gray-600">Create strong, unique passwords with ease. Our built-in generator ensures that
+                    you stay secure without the hassle of coming up with passwords yourself.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-blue-700 text-white py-4">
+        <div class="container mx-auto text-center">
+            <p>&copy; 2025 PassShield. All rights reserved.</p>
+        </div>
+    </footer>
+
+</div>
