@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { SliderModule } from 'primeng/slider';
 import { Checkbox } from 'primeng/checkbox';
 import { ToastService } from '../../../core/services/toast/toast.service';
-import { NgClass, NgFor, NgIf, TitleCasePipe } from '@angular/common';
+import { NgClass, TitleCasePipe } from '@angular/common';
 import { Tooltip } from 'primeng/tooltip';
 
 import {
@@ -21,8 +21,6 @@ import {
     Checkbox,
     NgClass,
     TitleCasePipe,
-    NgIf,
-    NgFor,
     Tooltip,
   ],
   templateUrl: './create-password.component.html',

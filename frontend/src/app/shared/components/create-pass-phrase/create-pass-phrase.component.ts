@@ -2,7 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SliderModule } from 'primeng/slider';
 import { Tooltip } from 'primeng/tooltip';
-import { NgClass, NgFor, NgIf, TitleCasePipe } from '@angular/common';
+import { NgClass, TitleCasePipe } from '@angular/common';
 import { ToastService } from '../../../core/services/toast/toast.service';
 
 import {
@@ -14,15 +14,7 @@ import {
 @Component({
   selector: 'app-create-pass-phrase',
   standalone: true,
-  imports: [
-    FormsModule,
-    SliderModule,
-    NgClass,
-    NgIf,
-    TitleCasePipe,
-    Tooltip,
-    NgFor,
-  ],
+  imports: [FormsModule, SliderModule, NgClass, TitleCasePipe, Tooltip],
   templateUrl: './create-pass-phrase.component.html',
   styleUrl: './create-pass-phrase.component.css',
 })
@@ -42,9 +34,18 @@ export class CreatePassPhraseComponent implements OnInit {
 
   setNumberCount(value: string): void {
     const numValue = Number(value);
-    this.numberCount =
-      numValue >= 0 && numValue <= 10 ? numValue : this.numberCount;
-    this.generatePassphrase();
+
+    if (numValue >= 0 && numValue <= 10) {
+      this.numberCount = numValue;
+      this.generatePassphrase();
+    } else {
+      this.numberCount = 0;
+      this.generatePassphrase();
+      this.toastService.showWarn(
+        'Warning',
+        'Number count must be between 0 and 10'
+      );
+    }
   }
 
   copyPassphrase(): void {
