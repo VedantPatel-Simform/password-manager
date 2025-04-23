@@ -34,7 +34,6 @@
                 <label class="text-sm font-medium text-gray-700">How many numbers?</label>
                 <input type="number" [(ngModel)]="numberCount" (change)="setNumberCount(numberCountValue.value)"
                     #numberCountValue value="0" min="0" max="10" step="1"
-                    (input)="setNumberCount(numberCountValue.value)"
                     class="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-500 text-sm transition-all" />
             </div>
             <!-- Separator Input -->
