@@ -21,10 +21,10 @@ declare global {
                 jwt: string;
             };
 
-            user?: {
-                id?: string;
-                name?: string;
-                email?: string;
+            user: {
+                id: string;
+                name: string;
+                email: string;
             };
         }
         interface Response {
