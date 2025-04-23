@@ -20,6 +20,8 @@ export interface IRegisterResponse {
 export interface ILoginResponse {
   success: boolean;
   user: {
+    name: string;
+    email: string;
     salt: string;
     dek: {
       cipherText: string;

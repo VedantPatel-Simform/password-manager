@@ -3,8 +3,8 @@ export function passwordComplexityValidator(): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
     const value = control.value || '';
 
-    if (value.length < 8) {
-      return { error: 'Minimum length of 8 characters is required.' };
+    if (value.length < 12) {
+      return { error: 'Minimum length of 12 characters is required.' };
     }
     if (!/[A-Z]/.test(value)) {
       return { error: 'At least 1 uppercase letter is required.' };

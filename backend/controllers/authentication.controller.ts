@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import expressAsyncHandler from 'express-async-handler';
 import { HTTP_STATUS } from '../constants/http.status.js';
 import { IRegister, ILogin } from '../interfaces/Auth.interface.js';
-import { createJwt } from '../utils/jwt.utils.js';
+import { createJwt, verifyJwt } from '../utils/jwt.utils.js';
 import { User } from '../models/User.model.js';
 import { ApiError } from '../utils/ApiError.utils.js';
 import argon2 from 'argon2';
@@ -18,21 +18,21 @@ export const registerController = expressAsyncHandler(
             );
         }
 
-        const response = await fetch(
-            `${process.env.PASSWORD_BREACH_ENDPOINT}/check?password=${encodeURIComponent(password)}`
-        );
+        // const response = await fetch(
+        //     `${process.env.PASSWORD_BREACH_ENDPOINT}/check?password=${encodeURIComponent(password)}`
+        // );
 
-        const data = (await response.json()) as {
-            success: boolean;
-            breached: boolean;
-        };
+        // const data = (await response.json()) as {
+        //     success: boolean;
+        //     breached: boolean;
+        // };
 
-        if (data.breached) {
-            throw new ApiError(
-                'This password has been exposed in a data breach. Please choose a different one.',
-                HTTP_STATUS.BAD_REQUEST.code
-            );
-        }
+        // if (data.breached) {
+        //     throw new ApiError(
+        //         'This password has been exposed in a data breach. Please choose a different one.',
+        //         HTTP_STATUS.BAD_REQUEST.code
+        //     );
+        // }
 
         const existingUser = await User.findOne({ email });
 
@@ -102,11 +102,50 @@ export const loginController = expressAsyncHandler(
         res.status(HTTP_STATUS.OK.code).json({
             success: true,
             user: {
+                name: user.name,
+                email: user.email,
                 salt: user.salt,
                 dek: user.dek,
                 rsa: user.rsa,
             },
             message: 'Login successful',
+        });
+    }
+);
+
+export const checkSessionController = expressAsyncHandler(
+    (req: Request, res: Response) => {
+        const token = req.cookies.jwt as string;
+        console.log('inside checksession');
+        if (!token || typeof token !== 'string') {
+            throw new ApiError(
+                'Authentication required',
+                HTTP_STATUS.UNAUTHORIZED.code
+            );
+        }
+        try {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const decoded = verifyJwt(token);
+            res.status(200).json({
+                success: true,
+                message: 'Verified User',
+            });
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (err) {
+            res.status(HTTP_STATUS.UNAUTHORIZED.code).json({
+                success: false,
+                message: 'Unauthorized User',
+            });
+        }
+    }
+);
+
+export const logoutController = expressAsyncHandler(
+    (req: Request, res: Response) => {
+        res.clearCookie('jwt');
+        res.status(HTTP_STATUS.OK.code).json({
+            success: true,
+            message: 'Logout Successful',
         });
     }
 );

@@ -35,6 +35,7 @@ import { Router, RouterLink } from '@angular/router';
 import { ToastService } from '../../../core/services/toast/toast.service';
 import { ToastComponent } from '../../../shared/components/toast/toast.component';
 import { KeyStorageService } from '../../../core/services/User/key-storage.service';
+import { UserDetailsService } from '../../../core/services/User/user-details.service';
 @Component({
   selector: 'app-login',
   imports: [
@@ -53,6 +54,7 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   submitted = false;
   router = inject(Router);
   keyService = inject(KeyStorageService);
+  userDetails = inject(UserDetailsService);
 
   // Inject ToastService instead of MessageService
   constructor(
@@ -66,9 +68,10 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    if (this.authService.isRegistered()) {
-      console.log('is registered');
-      this.toastService.showSuccess('success', 'Successfully Registered');
+    if (this.authService.getComingFrom() === 'register') {
+      this.toastService.showSuccess('Success', 'Successfully Registered');
+    } else if (this.authService.getComingFrom() === 'dashboard') {
+      this.toastService.showSuccess('Success', 'Successfully Logged out');
     }
   }
 
@@ -82,8 +85,6 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
     this.authService.login(formData).subscribe({
       next: async (res) => {
         if (isLoginResponse(res)) {
-          console.log('Login successful', res.user);
-
           // Show success message using ToastService
           this.toastService.showSuccess('success', res.message);
 
@@ -98,13 +99,16 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
             res.user.rsa.privateKey
           );
 
-          this.authService.setLoggedIn(true);
-
           this.keyService.setDekKey(userDek);
           this.keyService.setEncryptionKey(userEncKey);
           this.keyService.setPrivateKey(userPrivateKey);
           this.keyService.setPublicKey(res.user.rsa.publicKey);
-          this.router.navigate(['/dashboard']);
+          this.userDetails.setUserDetails({
+            name: res.user.name,
+            email: res.user.email,
+          });
+          this.authService.setComingFrom('login');
+          this.router.navigate(['/dashboard', 'generate-password']);
         } else {
           console.error('Unexpected response format:', res);
           // Show error message using ToastService
