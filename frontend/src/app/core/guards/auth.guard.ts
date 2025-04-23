@@ -29,7 +29,6 @@ export const authGuard: CanActivateFn = (
     .pipe(
       map((res) => {
         const isLoggedIn = res.success;
-        console.log('Auth Guard | Session valid:', isLoggedIn, '| URL:', url);
 
         if (isLoggedIn && isPublicRoute) {
           return router.createUrlTree(['/dashboard']);

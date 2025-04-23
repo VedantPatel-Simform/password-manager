@@ -94,7 +94,6 @@ export class RegisterComponent implements OnInit, OnDestroy {
 
     this.authService.register(formData).subscribe({
       next: (res) => {
-        console.log(res);
         if (isRegisterResponse(res)) {
           this.toast.showSuccess('Success', res.message);
           this.resetForm();

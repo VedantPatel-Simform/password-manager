@@ -85,8 +85,6 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
     this.authService.login(formData).subscribe({
       next: async (res) => {
         if (isLoginResponse(res)) {
-          console.log('Login successful', res.user);
-
           // Show success message using ToastService
           this.toastService.showSuccess('success', res.message);
 

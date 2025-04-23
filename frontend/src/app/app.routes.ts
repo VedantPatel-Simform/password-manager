@@ -24,6 +24,11 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'generate-password',
+      },
+      {
         path: 'generate-password',
         component: GeneratePasswordComponent,
       },

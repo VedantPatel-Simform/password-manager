@@ -68,6 +68,5 @@ export class CreatePasswordComponent implements OnInit {
       this.includeSymbols
     );
     this.passwordAnalytics = analyzePassword(this.generatedPassword);
-    console.log(generatePassphrase(this.passwordLength, '-'));
   }
 }
