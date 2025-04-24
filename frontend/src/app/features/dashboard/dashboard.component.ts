@@ -79,6 +79,11 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       routerLink: ['/dashboard/generate-password'],
     },
     {
+      label: 'Add Password',
+      icon: 'pi pi-plus-circle',
+      routerLink: ['/dashboard/add-password'],
+    },
+    {
       label: 'Password Dashboard',
       icon: 'pi pi-lock',
       routerLink: ['/dashboard/password-dashboard'],

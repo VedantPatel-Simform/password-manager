@@ -108,7 +108,7 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
             email: res.user.email,
           });
           this.authService.setComingFrom('login');
-          this.router.navigate(['/dashboard', 'generate-password']);
+          this.router.navigate(['/dashboard', 'password-dashboard']);
         } else {
           console.error('Unexpected response format:', res);
           // Show error message using ToastService
