@@ -34,4 +34,11 @@ const passwordSchema = new Schema<IPasswordDocument>(
         timestamps: true,
     }
 );
+
+passwordSchema.index(
+    { deletedTimeStamp: 1 },
+    {
+        expireAfterSeconds: process.env.AUTO_DELETE_AFTER_SECONDS,
+    }
+);
 export const Password = model<IPasswordDocument>('Password', passwordSchema);
