@@ -13,18 +13,19 @@ type PasswordBody = Omit<
 
 export const addPasswordController = expressAsyncHandler(
     async (req: Request<unknown, unknown, PasswordBody>, res: Response) => {
-        const { website, userName, password, notes, email } = req.body;
+        const { website, userName, password, notes, email, category } =
+            req.body;
         const { id } = req.user;
         const user = await User.findById(id);
         if (!user) {
             throw new ApiError('User not found', HTTP_STATUS.BAD_REQUEST.code);
         }
-
         const newPassword = await Password.create({
             userId: user._id.toString(),
             website,
             userName,
             password,
+            category,
             notes,
             email,
         });

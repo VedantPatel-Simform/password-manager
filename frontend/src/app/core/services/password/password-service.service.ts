@@ -3,23 +3,15 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import {
   IPassword,
   IEncryptedField,
+  CategoryValue,
 } from '../../../shared/interfaces/password.interface';
 import { BehaviorSubject, from, switchMap } from 'rxjs';
 import { encryptWithBase64Key } from '../../../utils/crypto.utils';
 import { KeyStorageService } from '../User/key-storage.service';
-
-type PasswordBody = {
-  website: string;
-  userName: string;
-  email: string;
-  password: string;
-  notes?: string;
-};
-
-type PasswordType = Omit<
-  IPassword,
-  'userId' | 'deleted' | 'deletedTimeStamp' | 'autoDeleteDate'
->;
+import {
+  PasswordBody,
+  PasswordType,
+} from '../../../shared/interfaces/password.interface';
 
 @Injectable({
   providedIn: 'root',
@@ -70,6 +62,7 @@ export class PasswordService {
           website: password.website,
           userName: password.userName,
           password: encryptedPassword,
+          category: password.category,
           notes: encryptedNotes,
         };
         console.log('send password = ', sendPassword);
@@ -98,6 +91,7 @@ export class PasswordService {
           website: password.website,
           userName: password.userName,
           password: encryptedPassword,
+          category: password.category,
           notes: encryptedNotes,
         };
 

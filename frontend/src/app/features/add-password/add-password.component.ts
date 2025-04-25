@@ -12,6 +12,7 @@ import { Dialog } from 'primeng/dialog';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { Select } from 'primeng/select';
 import { InputTextModule } from 'primeng/inputtext';
+import { CategoryValue } from '../../shared/interfaces/password.interface';
 @Component({
   selector: 'app-add-password',
   templateUrl: './add-password.component.html',
@@ -69,7 +70,8 @@ export class AddPasswordComponent {
     }
 
     const formData = this.passwordForm.value;
-
+    formData.category = formData.category.value;
+    console.log(formData);
     this.passwordService.createPasswordApi(formData).subscribe({
       next: (res) => {
         this.toastService.showSuccess(

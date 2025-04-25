@@ -25,6 +25,7 @@ const passwordSchema = new Schema<IPasswordDocument>(
         userName: { type: String, required: true },
         email: { type: String, required: true },
         password: { type: encryptedFieldSchema, required: true },
+        category: { type: String, required: true },
         notes: { type: encryptedFieldSchema },
         deleted: { type: Boolean, default: false },
         deletedTimeStamp: { type: Date },
