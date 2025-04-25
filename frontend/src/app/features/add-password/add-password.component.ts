@@ -1,30 +1,66 @@
 import { Component } from '@angular/core';
-import { FormsModule, NgForm } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  ReactiveFormsModule,
+  FormsModule,
+} from '@angular/forms';
 import { PasswordService } from '../../core/services/password/password-service.service';
 import { ToastService } from '../../core/services/toast/toast.service';
-
+import { Dialog } from 'primeng/dialog';
+import { FloatLabelModule } from 'primeng/floatlabel';
+import { Select } from 'primeng/select';
+import { InputTextModule } from 'primeng/inputtext';
 @Component({
   selector: 'app-add-password',
   templateUrl: './add-password.component.html',
   styleUrls: ['./add-password.component.css'],
-  imports: [FormsModule],
+  standalone: true,
+  imports: [
+    ReactiveFormsModule,
+    Dialog,
+    FormsModule,
+    FloatLabelModule,
+    Select,
+    InputTextModule,
+  ],
 })
 export class AddPasswordComponent {
-  form = {
-    website: '',
-    userName: '',
-    email: '',
-    password: '',
-    notes: '',
-  };
+  passwordForm: FormGroup;
+  showGenerator = false;
+  generatedPassword = '';
+  passwordVisible = false;
+  categoryOptions = [
+    { label: 'Social Media', value: 'social_media' },
+    { label: 'Work & Professional', value: 'work_professional' },
+    { label: 'Banking & Finance', value: 'banking_finance' },
+    { label: 'Entertainment', value: 'entertainment' },
+    { label: 'Personal', value: 'personal' },
+    { label: 'Education & Learning', value: 'education' },
+    { label: 'Shopping & E-commerce', value: 'shopping_ecommerce' },
+    { label: 'Health & Fitness', value: 'health_fitness' },
+    { label: 'Travel & Tourism', value: 'travel_tourism' },
+    { label: 'Other', value: 'other' },
+  ];
 
   constructor(
+    private fb: FormBuilder,
     private passwordService: PasswordService,
-    private toastService: ToastService // Optional: swap for PrimeNG Toast if needed
-  ) {}
+    private toastService: ToastService
+  ) {
+    this.passwordForm = this.fb.group({
+      website: ['', Validators.required],
+      userName: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', Validators.required],
+      category: ['', Validators.required],
+      notes: [''],
+    });
+  }
 
-  onSubmit(formRef: NgForm) {
-    if (formRef.invalid) {
+  onSubmit(): void {
+    if (this.passwordForm.invalid) {
       this.toastService.showError(
         'Error',
         'Please fill out all required fields'
@@ -32,23 +68,57 @@ export class AddPasswordComponent {
       return;
     }
 
-    console.log(this.form);
-    this.passwordService.createPasswordApi(this.form).subscribe({
-      next: (value) => {
+    const formData = this.passwordForm.value;
+
+    this.passwordService.createPasswordApi(formData).subscribe({
+      next: (res) => {
         this.toastService.showSuccess(
           'Created',
           'Password created successfully'
         );
-
-        console.log(value);
+        console.log(res);
+        this.passwordForm.reset();
       },
-
       error: (err) => {
-        this.toastService.showSuccess(
-          'Error',
-          'There was some error, please try again'
-        );
+        this.toastService.showError('Error', err.message);
       },
     });
+  }
+
+  generatePassword(): void {
+    const chars =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?';
+    this.generatedPassword = Array.from({ length: 16 }, () =>
+      chars.charAt(Math.floor(Math.random() * chars.length))
+    ).join('');
+  }
+
+  useGeneratedPassword(): void {
+    this.passwordForm.get('password')?.setValue(this.generatedPassword);
+    this.showGenerator = false;
+  }
+
+  get website() {
+    return this.passwordForm.get('website');
+  }
+
+  get userName() {
+    return this.passwordForm.get('userName');
+  }
+
+  get email() {
+    return this.passwordForm.get('email');
+  }
+
+  get password() {
+    return this.passwordForm.get('password');
+  }
+
+  get category() {
+    return this.passwordForm.get('category');
+  }
+
+  get notes() {
+    return this.passwordForm.get('notes');
   }
 }
