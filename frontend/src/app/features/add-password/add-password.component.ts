@@ -49,6 +49,9 @@ export class AddPasswordComponent {
     { label: 'Other', value: 'other' },
   ];
 
+  websiteRegex =
+    /^((https?|ftp|smtp):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/;
+
   @ViewChild('passwordModal') passwordModal!: PasswordModalComponent;
 
   setPassword() {
@@ -64,9 +67,18 @@ export class AddPasswordComponent {
     private toastService: ToastService
   ) {
     this.passwordForm = this.fb.group({
-      website: ['', Validators.required],
+      website: [
+        '',
+        [Validators.required, Validators.pattern(this.websiteRegex)],
+      ],
       userName: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
+      email: [
+        '',
+        [
+          Validators.required,
+          Validators.pattern(/^[\w\-\.]+@([\w\-]+\.)+[\w\-]{2,4}$/),
+        ],
+      ],
       password: ['', Validators.required],
       category: ['', Validators.required],
       notes: [''],
