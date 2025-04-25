@@ -1,10 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
   Validators,
   ReactiveFormsModule,
   FormsModule,
+  NgModel,
 } from '@angular/forms';
 import { PasswordService } from '../../core/services/password/password-service.service';
 import { ToastService } from '../../core/services/toast/toast.service';
@@ -12,7 +13,8 @@ import { Dialog } from 'primeng/dialog';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { Select } from 'primeng/select';
 import { InputTextModule } from 'primeng/inputtext';
-import { CategoryValue } from '../../shared/interfaces/password.interface';
+import { PasswordModalComponent } from '../../shared/components/password-modal/password-modal.component';
+
 @Component({
   selector: 'app-add-password',
   templateUrl: './add-password.component.html',
@@ -25,6 +27,7 @@ import { CategoryValue } from '../../shared/interfaces/password.interface';
     FloatLabelModule,
     Select,
     InputTextModule,
+    PasswordModalComponent,
   ],
 })
 export class AddPasswordComponent {
@@ -32,6 +35,7 @@ export class AddPasswordComponent {
   showGenerator = false;
   generatedPassword = '';
   passwordVisible = false;
+  selectedTab: 'password' | 'passphrase' = 'password';
   categoryOptions = [
     { label: 'Social Media', value: 'social_media' },
     { label: 'Work & Professional', value: 'work_professional' },
@@ -44,6 +48,15 @@ export class AddPasswordComponent {
     { label: 'Travel & Tourism', value: 'travel_tourism' },
     { label: 'Other', value: 'other' },
   ];
+
+  @ViewChild('passwordModal') passwordModal!: PasswordModalComponent;
+
+  setPassword() {
+    this.password?.setValue(this.passwordModal.getPassword());
+    this.visible = false;
+  }
+
+  visible: boolean = false;
 
   constructor(
     private fb: FormBuilder,
@@ -58,6 +71,10 @@ export class AddPasswordComponent {
       category: ['', Validators.required],
       notes: [''],
     });
+  }
+
+  showDialog() {
+    this.visible = true;
   }
 
   onSubmit(): void {
