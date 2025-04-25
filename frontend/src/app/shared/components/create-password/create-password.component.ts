@@ -69,4 +69,10 @@ export class CreatePasswordComponent implements OnInit {
     );
     this.passwordAnalytics = analyzePassword(this.generatedPassword);
   }
+
+  setPassword(s: string) {
+    this.generatedPassword = s;
+    this.passwordAnalytics = analyzePassword(this.generatedPassword);
+    this.passwordLength = s.length;
+  }
 }
