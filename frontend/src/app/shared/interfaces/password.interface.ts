@@ -42,3 +42,19 @@ export type PasswordType = Pick<
   IPassword,
   'email' | 'website' | 'userName' | 'password' | 'category' | 'notes'
 >;
+
+export interface IDecryptedPassword {
+  createdAt: Date;
+  updatedAt: Date;
+  _id: string;
+  userId: string;
+  website: string;
+  userName: string;
+  email: string;
+  password: string;
+  category: CategoryValue;
+  notes?: string;
+  deleted: boolean;
+  deletedTimeStamp?: Date;
+  autoDeleteDate?: Date;
+}

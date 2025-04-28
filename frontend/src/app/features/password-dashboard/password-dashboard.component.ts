@@ -9,7 +9,12 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { PasswordService } from '../../core/services/password/password-service.service';
 import { categoryOptions } from '../../core/constants/category.options';
 import { sortOptions } from '../../core/constants/sort.options';
-import { IPassword } from '../../shared/interfaces/password.interface';
+import {
+  IEncryptedField,
+  IPassword,
+} from '../../shared/interfaces/password.interface';
+import { KeyStorageService } from '../../core/services/User/key-storage.service';
+import { decryptWithBase64Key } from '../../utils/crypto.utils';
 @Component({
   selector: 'app-password-dashboard',
   imports: [
@@ -29,6 +34,7 @@ export class PasswordDashboardComponent {
   selectedCategory: string = 'all';
   sortOption: string = 'created';
   passwordService = inject(PasswordService);
+  keyService = inject(KeyStorageService);
   categoryOptions = categoryOptions;
   sortOptions = sortOptions;
   passwords: IPassword[] = [];
@@ -55,12 +61,22 @@ export class PasswordDashboardComponent {
     return this.passwords;
   }
 
-  copyPassword(password: string) {
-    navigator.clipboard.writeText(password);
+  async copyPassword(password: IEncryptedField) {
+    const base64Key = this.keyService.getDekKey();
+    const decryptedPassword = await decryptWithBase64Key(
+      base64Key as string,
+      password
+    );
+    navigator.clipboard.writeText(decryptedPassword);
     alert('Password copied to clipboard!');
   }
 
-  viewPassword(password: string) {
-    alert(`Password: ${password}`);
+  async viewPassword(password: IEncryptedField) {
+    const base64Key = this.keyService.getDekKey();
+    const decryptedPassword = await decryptWithBase64Key(
+      base64Key as string,
+      password
+    );
+    alert(`Password: ${decryptedPassword}`);
   }
 }

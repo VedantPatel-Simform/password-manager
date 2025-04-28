@@ -48,7 +48,7 @@ export class PasswordService {
   }
 
   createPasswordApi(password: PasswordBody) {
-    const encryptionKey = this.keyService.getEncryptionKey() as string;
+    const encryptionKey = this.keyService.getDekKey() as string;
 
     return from(
       Promise.all([
