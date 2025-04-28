@@ -61,7 +61,12 @@ export class PasswordDashboardComponent {
     return this.passwords;
   }
 
-  async copyPassword(password: IEncryptedField) {
+  async copyField(password: IEncryptedField | string) {
+    if (typeof password === 'string') {
+      navigator.clipboard.writeText(password);
+      alert('Email copied to clipboard');
+      return;
+    }
     const base64Key = this.keyService.getDekKey();
     const decryptedPassword = await decryptWithBase64Key(
       base64Key as string,
@@ -78,5 +83,20 @@ export class PasswordDashboardComponent {
       password
     );
     alert(`Password: ${decryptedPassword}`);
+  }
+
+  getDomainFromUrl(url: string): string {
+    try {
+      // Add https:// if no protocol is present
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        url = 'https://' + url;
+      }
+
+      const parsedUrl = new URL(url); // Parse the URL with protocol
+      return parsedUrl.hostname; // Extract and return the domain (hostname)
+    } catch (e) {
+      console.error('Invalid URL:', url); // Log invalid URLs
+      return ''; // Return an empty string if URL is invalid
+    }
   }
 }
