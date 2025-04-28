@@ -30,8 +30,6 @@ export const addPasswordController = expressAsyncHandler(
             email,
         });
 
-        console.log(newPassword);
-
         res.status(HTTP_STATUS.CREATED.code).json({
             success: true,
             password: newPassword,
@@ -125,12 +123,12 @@ export const allPasswordsController = expressAsyncHandler(
                 success: true,
                 message: 'No passwords available yet',
             });
+        } else {
+            res.status(HTTP_STATUS.OK.code).json({
+                success: true,
+                passwords: allPasswords,
+            });
         }
-
-        res.status(HTTP_STATUS.OK.code).json({
-            success: true,
-            passwords: allPasswords,
-        });
     }
 );
 

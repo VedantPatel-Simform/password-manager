@@ -14,6 +14,9 @@ export type CategoryValue =
   | 'travel_tourism'
   | 'other';
 export interface IPassword {
+  createdAt: Date;
+  updatedAt: Date;
+  _id: string;
   userId: string;
   website: string;
   userName: string;
@@ -35,7 +38,7 @@ export interface PasswordBody {
   notes?: string;
 }
 
-export type PasswordType = Omit<
+export type PasswordType = Pick<
   IPassword,
-  'userId' | 'deleted' | 'deletedTimeStamp' | 'autoDeleteDate'
+  'email' | 'website' | 'userName' | 'password' | 'category' | 'notes'
 >;

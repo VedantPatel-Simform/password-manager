@@ -17,19 +17,21 @@ import {
   providedIn: 'root',
 })
 export class PasswordService {
-  http = inject(HttpClient);
-  keyService = inject(KeyStorageService);
+  private http = inject(HttpClient);
+  private keyService = inject(KeyStorageService);
   constructor() {}
 
   private $passwordList = new BehaviorSubject<IPassword[]>([]);
   $password = this.$passwordList.asObservable();
 
-  get $passwords() {
-    return this.$password;
+  set passwordList(value: IPassword[]) {
+    this.$passwordList.next(value);
   }
 
   getPasswordsApi() {
-    return this.http.get<{ success: boolean; password: IPassword[] }>('/all/');
+    return this.http.get<{ success: boolean; passwords: IPassword[] }>(
+      '/user/password/all/'
+    );
   }
 
   deletePasswordApi(id: string) {
@@ -65,7 +67,6 @@ export class PasswordService {
           category: password.category,
           notes: encryptedNotes,
         };
-        console.log('send password = ', sendPassword);
         return this.http.post<{ success: boolean; password: IPassword }>(
           '/user/password/add/',
           sendPassword

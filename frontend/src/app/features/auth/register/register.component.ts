@@ -82,7 +82,6 @@ export class RegisterComponent implements OnInit, OnDestroy {
 
     if (this.registerForm.invalid) {
       this.registerForm.markAllAsTouched();
-      console.log('Form Invalid');
       return;
     }
 

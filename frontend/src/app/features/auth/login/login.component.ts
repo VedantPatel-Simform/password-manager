@@ -78,7 +78,6 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   onSubmit() {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
-      console.log('Form Invalid');
       return;
     }
     const formData: ILoginData = this.loginForm.value;

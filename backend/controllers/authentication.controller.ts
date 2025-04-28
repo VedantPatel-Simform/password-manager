@@ -58,8 +58,6 @@ export const registerController = expressAsyncHandler(
             rsa,
         });
 
-        console.log(newUser);
-
         res.status(HTTP_STATUS.CREATED.code).json({
             success: true,
             message: 'Registration Successful',
