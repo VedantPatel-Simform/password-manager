@@ -19,6 +19,8 @@ import { decryptWithBase64Key } from '../../utils/crypto.utils';
 import { from, Subscription } from 'rxjs';
 import { analyzePassword } from '../../utils/password.utils';
 import { ToastService } from '../../core/services/toast/toast.service';
+
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-password-dashboard',
   imports: [
@@ -51,6 +53,7 @@ export class PasswordDashboardComponent implements OnInit, OnDestroy {
   passwordApiSub!: Subscription;
   passwordListSub!: Subscription;
   toastService = inject(ToastService);
+  router = inject(Router);
   constructor() {}
 
   ngOnInit(): void {
@@ -165,6 +168,11 @@ export class PasswordDashboardComponent implements OnInit, OnDestroy {
       console.error('Invalid URL:', url);
       return '';
     }
+  }
+
+  viewDetails(password: IDecryptedPassword & { toggle: boolean }) {
+    this.router.navigate(['/dashboard/', password._id]),
+      { relativeTo: this.router };
   }
 
   ngOnDestroy(): void {

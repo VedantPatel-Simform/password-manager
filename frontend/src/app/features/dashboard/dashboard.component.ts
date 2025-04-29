@@ -18,7 +18,7 @@ import { ToastService } from '../../core/services/toast/toast.service';
 import { ToastComponent } from '../../shared/components/toast/toast.component';
 import { DrawerModule } from 'primeng/drawer'; // Import Drawer module
 import { UserDetailsService } from '../../core/services/User/user-details.service';
-
+import { TitleCasePipe } from '@angular/common';
 @Component({
   selector: 'app-dashboard',
   imports: [
@@ -29,6 +29,7 @@ import { UserDetailsService } from '../../core/services/User/user-details.servic
     AccordionModule,
     ToastComponent,
     DrawerModule, // Add Drawer module here
+    TitleCasePipe,
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css'],
@@ -86,7 +87,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     {
       label: 'Password Dashboard',
       icon: 'pi pi-lock',
-      routerLink: ['/dashboard/password-dashboard'],
+      routerLink: ['/dashboard/passwords'],
     },
     {
       label: 'Shared Passwords',

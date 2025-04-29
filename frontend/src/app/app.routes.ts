@@ -5,8 +5,8 @@ import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { LoginComponent } from './features/auth/login/login.component';
 import { RegisterComponent } from './features/auth/register/register.component';
 import { GeneratePasswordComponent } from './features/generate-password/generate-password.component';
-import { PasswordDashboardComponent } from './features/password-dashboard/password-dashboard.component';
 import { AddPasswordComponent } from './features/add-password/add-password.component';
+import { PasswordDashboardComponent } from './features/password-dashboard/password-dashboard.component';
 export const routes: Routes = [
   { path: '', component: LandingPageComponent, canActivate: [authGuard] },
 
@@ -28,7 +28,7 @@ export const routes: Routes = [
       {
         path: '',
         pathMatch: 'full',
-        redirectTo: 'password-dashboard',
+        redirectTo: 'passwords',
       },
       {
         path: 'generate-password',
@@ -39,7 +39,7 @@ export const routes: Routes = [
         component: AddPasswordComponent,
       },
       {
-        path: 'password-dashboard',
+        path: 'passwords',
         component: PasswordDashboardComponent,
       },
       // Add more child routes here
