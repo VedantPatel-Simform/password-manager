@@ -28,6 +28,12 @@ export class PasswordService {
     this.$passwordList.next(value);
   }
 
+  getPasswordApi(id: string) {
+    return this.http.get<{ success: boolean; password: IPassword }>(
+      '/user/password/get/' + id
+    );
+  }
+
   getPasswordsApi() {
     return this.http.get<{ success: boolean; passwords: IPassword[] }>(
       '/user/password/all/'

@@ -171,8 +171,7 @@ export class PasswordDashboardComponent implements OnInit, OnDestroy {
   }
 
   viewDetails(password: IDecryptedPassword & { toggle: boolean }) {
-    this.router.navigate(['/dashboard/', password._id]),
-      { relativeTo: this.router };
+    this.router.navigate(['/dashboard/passwords/', password._id]);
   }
 
   ngOnDestroy(): void {
