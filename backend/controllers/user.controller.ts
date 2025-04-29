@@ -161,3 +161,24 @@ export const editPasswordController = expressAsyncHandler(
         });
     }
 );
+
+export const getPassword = expressAsyncHandler(
+    async (
+        req: Request<{ passwordId: string }, unknown, unknown>,
+        res: Response
+    ) => {
+        const { passwordId } = req.params;
+        const password = await Password.findById(passwordId);
+        if (!password) {
+            throw new ApiError(
+                'Password not found',
+                HTTP_STATUS.NOT_FOUND.code
+            );
+        }
+
+        res.status(200).json({
+            success: true,
+            password,
+        });
+    }
+);
