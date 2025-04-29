@@ -1,5 +1,5 @@
-import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { CommonModule, NgClass } from '@angular/common';
+import { Component, DoCheck, inject, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Dropdown, DropdownItem, DropdownModule } from 'primeng/dropdown';
 import { InputText } from 'primeng/inputtext';
@@ -10,11 +10,15 @@ import { PasswordService } from '../../core/services/password/password-service.s
 import { categoryOptions } from '../../core/constants/category.options';
 import { sortOptions } from '../../core/constants/sort.options';
 import {
+  IDecryptedPassword,
   IEncryptedField,
   IPassword,
 } from '../../shared/interfaces/password.interface';
 import { KeyStorageService } from '../../core/services/User/key-storage.service';
 import { decryptWithBase64Key } from '../../utils/crypto.utils';
+import { from, Subscription } from 'rxjs';
+import { analyzePassword } from '../../utils/password.utils';
+import { ToastService } from '../../core/services/toast/toast.service';
 @Component({
   selector: 'app-password-dashboard',
   imports: [
@@ -25,11 +29,12 @@ import { decryptWithBase64Key } from '../../utils/crypto.utils';
     InputText,
     InputGroupAddonModule,
     InputGroupModule,
+    NgClass,
   ],
   templateUrl: './password-dashboard.component.html',
   styleUrl: './password-dashboard.component.css',
 })
-export class PasswordDashboardComponent {
+export class PasswordDashboardComponent implements OnInit, OnDestroy {
   searchTerm: string = '';
   selectedCategory: string = 'all';
   sortOption: string = 'created';
@@ -38,11 +43,20 @@ export class PasswordDashboardComponent {
   categoryOptions = categoryOptions;
   sortOptions = sortOptions;
   passwords: IPassword[] = [];
+  decryptedPasswords: (IDecryptedPassword & { toggle: boolean })[] = [];
+  filteredPasswordList:
+    | (IDecryptedPassword & { toggle: boolean })[]
+    | undefined = [];
+  showPassword = false;
+  passwordApiSub!: Subscription;
+  passwordListSub!: Subscription;
+  toastService = inject(ToastService);
   constructor() {}
 
   ngOnInit(): void {
-    this.passwordService.getPasswordsApi().subscribe({
+    this.passwordApiSub = this.passwordService.getPasswordsApi().subscribe({
       next: (value) => {
+        console.log('VALUE ==== ', value);
         this.passwordService.passwordList = value.passwords;
       },
       error: (err: any) => {
@@ -50,30 +64,83 @@ export class PasswordDashboardComponent {
       },
     });
 
-    this.passwordService.$password.subscribe({
+    this.passwordListSub = this.passwordService.$password.subscribe({
       next: (value) => {
-        this.passwords = value;
+        // array of promises
+        const decryptedPasswordList = value.map(async (password) => {
+          const decryptedPassword = await decryptWithBase64Key(
+            this.keyService.getDekKey() as string,
+            password.password
+          );
+
+          const decryptedNotes = password.notes
+            ? await decryptWithBase64Key(
+                this.keyService.getDekKey() as string,
+                password.notes
+              )
+            : '';
+
+          return {
+            ...password,
+            password: decryptedPassword,
+            notes: decryptedNotes,
+            toggle: false,
+          };
+        });
+
+        this.decryptedPasswords = [];
+        from(Promise.all(decryptedPasswordList)).subscribe((val) => {
+          this.decryptedPasswords = val;
+        });
       },
     });
   }
 
   get filteredPasswords() {
-    return this.passwords;
+    this.filteredPasswordList = [...this.decryptedPasswords];
+    if (this.selectedCategory !== 'all') {
+      this.filteredPasswordList = this.decryptedPasswords.filter(
+        (item) => item.category === this.selectedCategory
+      );
+    }
+
+    this.searchTerm = this.searchTerm.toLowerCase();
+    if (this.searchTerm) {
+      this.filteredPasswordList = this.filteredPasswordList.filter((item) => {
+        return (
+          item.website.toLowerCase().includes(this.searchTerm) ||
+          item.email.toLowerCase().includes(this.searchTerm) ||
+          item.userName.toLowerCase().includes(this.searchTerm)
+        );
+      });
+    }
+
+    if (this.sortOption === 'created') {
+      this.filteredPasswordList.sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+    } else if (this.sortOption === 'updated') {
+      this.filteredPasswordList.sort(
+        (a, b) =>
+          new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+      );
+    }
+
+    return this.filteredPasswordList;
   }
 
-  async copyField(password: IEncryptedField | string) {
-    if (typeof password === 'string') {
+  copyField(password: string, type: 'email' | 'password') {
+    if (type === 'email') {
       navigator.clipboard.writeText(password);
-      alert('Email copied to clipboard');
+      this.toastService.showSuccess('Copied', 'Email Copied to clipboard');
       return;
     }
-    const base64Key = this.keyService.getDekKey();
-    const decryptedPassword = await decryptWithBase64Key(
-      base64Key as string,
-      password
-    );
-    navigator.clipboard.writeText(decryptedPassword);
-    alert('Password copied to clipboard!');
+    if (type === 'password') {
+      navigator.clipboard.writeText(password);
+      this.toastService.showSuccess('Copied', 'Password Copied to clipboard');
+      return;
+    }
   }
 
   async viewPassword(password: IEncryptedField) {
@@ -92,11 +159,16 @@ export class PasswordDashboardComponent {
         url = 'https://' + url;
       }
 
-      const parsedUrl = new URL(url); // Parse the URL with protocol
-      return parsedUrl.hostname; // Extract and return the domain (hostname)
+      const parsedUrl = new URL(url);
+      return parsedUrl.hostname;
     } catch (e) {
-      console.error('Invalid URL:', url); // Log invalid URLs
-      return ''; // Return an empty string if URL is invalid
+      console.error('Invalid URL:', url);
+      return '';
     }
+  }
+
+  ngOnDestroy(): void {
+    this.passwordApiSub.unsubscribe();
+    this.passwordListSub.unsubscribe();
   }
 }
