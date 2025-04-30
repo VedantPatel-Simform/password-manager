@@ -71,23 +71,26 @@ export class ViewPasswordComponent implements OnInit, AfterViewInit {
     this.passwordService
       .getPasswordApi(this.passwordId)
       .subscribe(async (res) => {
-        this.localPassword = res.password;
-        const decryptedPassword = await decryptWithBase64Key(
-          this.dek,
-          this.localPassword.password
-        );
+        if (res.password.deleted) {
+          this.router.navigate(['/dashboard/passwords']);
+        } else {
+          this.localPassword = res.password;
+          const decryptedPassword = await decryptWithBase64Key(
+            this.dek,
+            this.localPassword.password
+          );
 
-        const decryptedNotes = this.localPassword.notes
-          ? await decryptWithBase64Key(this.dek, this.localPassword.notes)
-          : '';
-        this.localDecryptedPassword = {
-          ...this.localPassword,
-          password: decryptedPassword,
-          notes: decryptedNotes,
-        };
+          const decryptedNotes = this.localPassword.notes
+            ? await decryptWithBase64Key(this.dek, this.localPassword.notes)
+            : '';
+          this.localDecryptedPassword = {
+            ...this.localPassword,
+            password: decryptedPassword,
+            notes: decryptedNotes,
+          };
 
-        console.log(this.localDecryptedPassword);
-        this.initForm();
+          this.initForm();
+        }
       });
   }
 

@@ -25,8 +25,11 @@ export class PasswordService {
   $password = this.$passwordList.asObservable();
 
   setPasswords(value: IPassword[]) {
-    console.log('In service = ', value);
-    this.$passwordList.next(value);
+    if (value.length > 0) {
+      this.$passwordList.next(value);
+    } else {
+      this.$passwordList.next([]);
+    }
   }
 
   getPasswordApi(id: string) {

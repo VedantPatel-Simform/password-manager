@@ -1,142 +1,169 @@
+import {
+  Component,
+  OnDestroy,
+  inject,
+  ChangeDetectorRef,
+  NgZone,
+} from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
-import { Component, DoCheck, inject, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Dropdown, DropdownItem, DropdownModule } from 'primeng/dropdown';
+import { Router } from '@angular/router';
+
+// PrimeNG Modules
+import { DropdownModule, Dropdown, DropdownItem } from 'primeng/dropdown';
 import { InputText } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
+
+// RxJS
+import { forkJoin, from, map, of, Subscription, switchMap } from 'rxjs';
+
+// Project Services and Utils
 import { PasswordService } from '../../core/services/password/password-service.service';
+import { KeyStorageService } from '../../core/services/User/key-storage.service';
+import { ToastService } from '../../core/services/toast/toast.service';
+import { decryptWithBase64Key } from '../../utils/crypto.utils';
+
+// Constants and Interfaces
 import { categoryOptions } from '../../core/constants/category.options';
 import { sortOptions } from '../../core/constants/sort.options';
 import {
+  IPassword,
   IDecryptedPassword,
   IEncryptedField,
-  IPassword,
 } from '../../shared/interfaces/password.interface';
-import { KeyStorageService } from '../../core/services/User/key-storage.service';
-import { decryptWithBase64Key } from '../../utils/crypto.utils';
-import { from, Subscription } from 'rxjs';
-import { analyzePassword } from '../../utils/password.utils';
-import { ToastService } from '../../core/services/toast/toast.service';
-import { Router } from '@angular/router';
+
 @Component({
   selector: 'app-password-dashboard',
+  standalone: true,
   imports: [
-    DropdownModule,
-    FormsModule,
     CommonModule,
+    FormsModule,
+    DropdownModule,
     ButtonModule,
     InputText,
-    InputGroupAddonModule,
     InputGroupModule,
+    InputGroupAddonModule,
     NgClass,
   ],
   templateUrl: './password-dashboard.component.html',
   styleUrl: './password-dashboard.component.css',
 })
-export class PasswordDashboardComponent implements OnInit, OnDestroy {
-  searchTerm: string = '';
-  selectedCategory: string = 'all';
-  sortOption: string = 'created';
-
-  passwordService = inject(PasswordService);
-  keyService = inject(KeyStorageService);
+export class PasswordDashboardComponent implements OnDestroy {
+  searchTerm = '';
+  selectedCategory = 'all';
+  sortOption = 'created';
+  loading = true;
 
   categoryOptions = categoryOptions;
   sortOptions = sortOptions;
 
   passwords: IPassword[] = [];
   decryptedPasswords: (IDecryptedPassword & { toggle: boolean })[] = [];
-  filteredPasswordList:
-    | (IDecryptedPassword & { toggle: boolean })[]
-    | undefined = [];
-  showPassword = false;
+  filteredPasswordList: (IDecryptedPassword & { toggle: boolean })[] = [];
+
+  // Subscriptions
   passwordApiSub!: Subscription;
   passwordListSub!: Subscription;
-  toastService = inject(ToastService);
-  router = inject(Router);
 
-  constructor() {}
+  // Injected services
+  private passwordService = inject(PasswordService);
+  private keyService = inject(KeyStorageService);
+  private toastService = inject(ToastService);
+  private router = inject(Router);
+  private changeDetectorRef = inject(ChangeDetectorRef);
+  private ngZone = inject(NgZone);
 
-  ngOnInit(): void {
+  constructor() {
     this.passwordApiSub = this.passwordService.getPasswordsApi().subscribe({
-      next: (value) => {
-        this.passwordService.setPasswords(value.passwords);
+      next: ({ passwords }) => {
+        this.passwordService.setPasswords(passwords);
+        this.loading = false;
       },
-      error: (err: any) => {
+      error: (err) => {
         this.toastService.showError('Something went wrong', err.message);
       },
     });
-
-    this.passwordListSub = this.passwordService.$password.subscribe({
-      next: (value) => {
-        if (value.length > 0) {
-          // array of promises
-          const decryptedPasswordList = value.map(async (password) => {
-            const decryptedPassword = await decryptWithBase64Key(
-              this.keyService.getDekKey() as string,
-              password.password
-            );
-
-            const decryptedNotes = password.notes
-              ? await decryptWithBase64Key(
-                  this.keyService.getDekKey() as string,
-                  password.notes
-                )
-              : '';
-
-            return {
-              ...password,
-              password: decryptedPassword,
-              notes: decryptedNotes,
-              toggle: false,
-            };
-          });
-
-          this.decryptedPasswords = [];
-          from(Promise.all(decryptedPasswordList)).subscribe((val) => {
-            this.decryptedPasswords = val;
-          });
-        } else {
-          this.decryptedPasswords = [];
-        }
-      },
-    });
+    this.subscribeToPasswordChange();
   }
 
-  get filteredPasswords() {
-    this.filteredPasswordList = [...this.decryptedPasswords];
+  private subscribeToPasswordChange(): void {
+    this.passwordListSub = this.passwordService.$password
+      .pipe(
+        switchMap((list) => {
+          // if empty, emit [] immediately
+          if (!list.length) {
+            return of([] as (IDecryptedPassword & { toggle: boolean })[]);
+          }
+
+          // build an array of Observables, one per password
+          const decryptCalls = list.map((p) =>
+            // first decrypt the password
+            from(
+              decryptWithBase64Key(this.keyService.getDekKey()!, p.password)
+            ).pipe(
+              switchMap((decryptedPassword) =>
+                // then decrypt the notes (or resolve to empty string)
+                from(
+                  p.notes
+                    ? decryptWithBase64Key(
+                        this.keyService.getDekKey()!,
+                        p.notes
+                      )
+                    : Promise.resolve('')
+                ).pipe(
+                  // finally map both results into your decrypted shape
+                  map((decryptedNotes) => ({
+                    ...p,
+                    password: decryptedPassword,
+                    notes: decryptedNotes,
+                    toggle: false,
+                  }))
+                )
+              )
+            )
+          );
+
+          // forkJoin waits until *all* decryptCalls complete, then emits an array
+          return forkJoin(decryptCalls);
+        })
+      )
+      .subscribe((decryptedArray) => {
+        this.decryptedPasswords = decryptedArray;
+      });
+  }
+
+  get filteredPasswords(): (IDecryptedPassword & { toggle: boolean })[] {
+    let filtered = [...this.decryptedPasswords].filter((p) => !p.deleted);
+
     if (this.selectedCategory !== 'all') {
-      this.filteredPasswordList = this.decryptedPasswords.filter(
-        (item) => item.category === this.selectedCategory
+      filtered = filtered.filter((p) => p.category === this.selectedCategory);
+    }
+
+    if (this.searchTerm) {
+      const term = this.searchTerm.toLowerCase();
+      filtered = filtered.filter(
+        (p) =>
+          p.website.toLowerCase().includes(term) ||
+          p.email.toLowerCase().includes(term) ||
+          p.userName.toLowerCase().includes(term)
       );
     }
 
-    this.searchTerm = this.searchTerm.toLowerCase();
-    if (this.searchTerm) {
-      this.filteredPasswordList = this.filteredPasswordList.filter((item) => {
-        return (
-          item.website.toLowerCase().includes(this.searchTerm) ||
-          item.email.toLowerCase().includes(this.searchTerm) ||
-          item.userName.toLowerCase().includes(this.searchTerm)
-        );
-      });
-    }
-
     if (this.sortOption === 'created') {
-      this.filteredPasswordList.sort(
+      filtered.sort(
         (a, b) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
     } else if (this.sortOption === 'updated') {
-      this.filteredPasswordList.sort(
+      filtered.sort(
         (a, b) =>
           new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
       );
     }
 
-    return this.filteredPasswordList;
+    return filtered;
   }
 
   copyField(password: string, type: 'email' | 'password') {
@@ -152,31 +179,25 @@ export class PasswordDashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  async viewPassword(password: IEncryptedField) {
-    const base64Key = this.keyService.getDekKey();
-    const decryptedPassword = await decryptWithBase64Key(
-      base64Key as string,
-      password
-    );
-    alert(`Password: ${decryptedPassword}`);
+  async viewPassword(password: IEncryptedField): Promise<void> {
+    const key = this.keyService.getDekKey();
+    const decrypted = await decryptWithBase64Key(key as string, password);
+    alert(`Password: ${decrypted}`);
   }
 
   getDomainFromUrl(url: string): string {
     try {
-      // Add https:// if no protocol is present
       if (!url.startsWith('http://') && !url.startsWith('https://')) {
         url = 'https://' + url;
       }
-
-      const parsedUrl = new URL(url);
-      return parsedUrl.hostname;
-    } catch (e) {
+      return new URL(url).hostname;
+    } catch {
       console.error('Invalid URL:', url);
       return '';
     }
   }
 
-  viewDetails(password: IDecryptedPassword & { toggle: boolean }) {
+  viewDetails(password: IDecryptedPassword & { toggle: boolean }): void {
     this.router.navigate(['/dashboard/passwords/', password._id]);
   }
 
