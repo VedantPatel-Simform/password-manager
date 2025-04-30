@@ -11,7 +11,6 @@ import { Router, RouterModule } from '@angular/router';
 import { ScrollPanelModule } from 'primeng/scrollpanel';
 import { ButtonModule } from 'primeng/button';
 import { AccordionModule } from 'primeng/accordion';
-import { AccordionTab } from 'primeng/accordion';
 import { KeyStorageService } from '../../core/services/User/key-storage.service';
 import { AuthService } from '../../core/services/auth/auth.service';
 import { ToastService } from '../../core/services/toast/toast.service';
@@ -55,9 +54,14 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
 
   // On AfterViewInit lifecycle hook (for showing success toast after login)
   ngAfterViewInit(): void {
-    if (this.authService.getComingFrom() === 'login') {
+    const comingFrom = this.authService.getComingFrom();
+    if (comingFrom === 'login') {
       this.toastService.clear();
       this.toastService.showSuccess('Success', 'Successfully Logged in');
+    } else if (comingFrom === 'editPassword') {
+      this.toastService.showSuccess('Edited', 'Password successfully edited');
+    } else if (comingFrom === 'deletePassword') {
+      this.toastService.showSuccess('Deleted', 'Password successfully deleted');
     }
   }
 

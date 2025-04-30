@@ -19,7 +19,6 @@ import { decryptWithBase64Key } from '../../utils/crypto.utils';
 import { from, Subscription } from 'rxjs';
 import { analyzePassword } from '../../utils/password.utils';
 import { ToastService } from '../../core/services/toast/toast.service';
-
 import { Router } from '@angular/router';
 @Component({
   selector: 'app-password-dashboard',
@@ -40,10 +39,13 @@ export class PasswordDashboardComponent implements OnInit, OnDestroy {
   searchTerm: string = '';
   selectedCategory: string = 'all';
   sortOption: string = 'created';
+
   passwordService = inject(PasswordService);
   keyService = inject(KeyStorageService);
+
   categoryOptions = categoryOptions;
   sortOptions = sortOptions;
+
   passwords: IPassword[] = [];
   decryptedPasswords: (IDecryptedPassword & { toggle: boolean })[] = [];
   filteredPasswordList:
@@ -54,47 +56,51 @@ export class PasswordDashboardComponent implements OnInit, OnDestroy {
   passwordListSub!: Subscription;
   toastService = inject(ToastService);
   router = inject(Router);
+
   constructor() {}
 
   ngOnInit(): void {
     this.passwordApiSub = this.passwordService.getPasswordsApi().subscribe({
       next: (value) => {
-        console.log('VALUE ==== ', value);
-        this.passwordService.passwordList = value.passwords;
+        this.passwordService.setPasswords(value.passwords);
       },
       error: (err: any) => {
-        console.log(err);
+        this.toastService.showError('Something went wrong', err.message);
       },
     });
 
     this.passwordListSub = this.passwordService.$password.subscribe({
       next: (value) => {
-        // array of promises
-        const decryptedPasswordList = value.map(async (password) => {
-          const decryptedPassword = await decryptWithBase64Key(
-            this.keyService.getDekKey() as string,
-            password.password
-          );
+        if (value.length > 0) {
+          // array of promises
+          const decryptedPasswordList = value.map(async (password) => {
+            const decryptedPassword = await decryptWithBase64Key(
+              this.keyService.getDekKey() as string,
+              password.password
+            );
 
-          const decryptedNotes = password.notes
-            ? await decryptWithBase64Key(
-                this.keyService.getDekKey() as string,
-                password.notes
-              )
-            : '';
+            const decryptedNotes = password.notes
+              ? await decryptWithBase64Key(
+                  this.keyService.getDekKey() as string,
+                  password.notes
+                )
+              : '';
 
-          return {
-            ...password,
-            password: decryptedPassword,
-            notes: decryptedNotes,
-            toggle: false,
-          };
-        });
+            return {
+              ...password,
+              password: decryptedPassword,
+              notes: decryptedNotes,
+              toggle: false,
+            };
+          });
 
-        this.decryptedPasswords = [];
-        from(Promise.all(decryptedPasswordList)).subscribe((val) => {
-          this.decryptedPasswords = val;
-        });
+          this.decryptedPasswords = [];
+          from(Promise.all(decryptedPasswordList)).subscribe((val) => {
+            this.decryptedPasswords = val;
+          });
+        } else {
+          this.decryptedPasswords = [];
+        }
       },
     });
   }

@@ -14,6 +14,7 @@ import { FloatLabelModule } from 'primeng/floatlabel';
 import { Select } from 'primeng/select';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModalComponent } from '../../shared/components/password-modal/password-modal.component';
+import { PasswordBody } from '../../shared/interfaces/password.interface';
 
 @Component({
   selector: 'app-add-password',
@@ -98,9 +99,7 @@ export class AddPasswordComponent {
       return;
     }
 
-    const formData = this.passwordForm.value;
-    formData.category = formData.category.value;
-    console.log(formData);
+    const formData = this.passwordForm.value as PasswordBody;
     this.passwordService.createPasswordApi(formData).subscribe({
       next: (res) => {
         this.toastService.showSuccess(

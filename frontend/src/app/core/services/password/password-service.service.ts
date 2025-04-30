@@ -24,7 +24,8 @@ export class PasswordService {
   private $passwordList = new BehaviorSubject<IPassword[]>([]);
   $password = this.$passwordList.asObservable();
 
-  set passwordList(value: IPassword[]) {
+  setPasswords(value: IPassword[]) {
+    console.log('In service = ', value);
     this.$passwordList.next(value);
   }
 
@@ -70,7 +71,7 @@ export class PasswordService {
           website: password.website,
           userName: password.userName,
           password: encryptedPassword,
-          category: password.category,
+          category: password.category.value,
           notes: encryptedNotes,
         };
         return this.http.post<{ success: boolean; password: IPassword }>(
@@ -81,8 +82,8 @@ export class PasswordService {
     );
   }
 
-  editPasswordApi(password: PasswordBody) {
-    const encryptionKey = this.keyService.getEncryptionKey() as string;
+  editPasswordApi(password: PasswordBody & { _id: string }) {
+    const encryptionKey = this.keyService.getDekKey() as string;
 
     return from(
       Promise.all([
@@ -98,12 +99,11 @@ export class PasswordService {
           website: password.website,
           userName: password.userName,
           password: encryptedPassword,
-          category: password.category,
+          category: password.category.value,
           notes: encryptedNotes,
         };
-
         return this.http.put<{ success: boolean; message: string }>(
-          '/user/password/edit',
+          '/user/password/edit/' + password._id,
           sendPassword
         );
       })

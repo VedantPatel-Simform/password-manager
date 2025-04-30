@@ -34,7 +34,10 @@ export interface PasswordBody {
   userName: string;
   email: string;
   password: string;
-  category: CategoryValue;
+  category: {
+    label: string;
+    value: CategoryValue;
+  };
   notes?: string;
 }
 

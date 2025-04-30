@@ -49,6 +49,7 @@ export const registerController = expressAsyncHandler(
             type: argon2.argon2id,
         });
 
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const newUser = await User.create({
             name,
             email,

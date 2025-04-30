@@ -117,18 +117,15 @@ export const restorePasswordController = expressAsyncHandler(
 export const allPasswordsController = expressAsyncHandler(
     async (req: Request, res: Response) => {
         const { id } = req.user;
-        const allPasswords = await Password.find({ userId: id });
-        if (allPasswords.length === 0) {
-            res.status(HTTP_STATUS.OK.code).json({
-                success: true,
-                message: 'No passwords available yet',
-            });
-        } else {
-            res.status(HTTP_STATUS.OK.code).json({
-                success: true,
-                passwords: allPasswords,
-            });
-        }
+        const allPasswords = await Password.find({
+            userId: id,
+            deleted: false,
+        });
+
+        res.status(HTTP_STATUS.OK.code).json({
+            success: true,
+            passwords: allPasswords,
+        });
     }
 );
 
@@ -138,7 +135,8 @@ export const editPasswordController = expressAsyncHandler(
         res: Response
     ) => {
         const { passwordId } = req.params;
-        const { website, userName, password, notes, email } = req.body;
+        const { website, userName, password, notes, email, category } =
+            req.body;
         const editPassword = await Password.findById(passwordId);
         if (!editPassword) {
             throw new ApiError(
@@ -152,6 +150,7 @@ export const editPasswordController = expressAsyncHandler(
         editPassword.password = password;
         editPassword.notes = notes;
         editPassword.email = email;
+        editPassword.category = category;
 
         await editPassword.save();
 
