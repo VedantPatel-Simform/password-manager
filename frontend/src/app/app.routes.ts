@@ -8,6 +8,7 @@ import { GeneratePasswordComponent } from './features/generate-password/generate
 import { AddPasswordComponent } from './features/add-password/add-password.component';
 import { PasswordDashboardComponent } from './features/password-dashboard/password-dashboard.component';
 import { ViewPasswordComponent } from './shared/components/view-password/view-password.component';
+import { RecycleBinComponent } from './features/recycle-bin/recycle-bin.component';
 export const routes: Routes = [
   { path: '', component: LandingPageComponent, canActivate: [authGuard] },
 
@@ -46,6 +47,10 @@ export const routes: Routes = [
       {
         path: 'passwords/:id',
         component: ViewPasswordComponent,
+      },
+      {
+        path: 'recycle-bin',
+        component: RecycleBinComponent,
       },
       // Add more child routes here
     ],
