@@ -112,4 +112,16 @@ export class PasswordService {
       })
     );
   }
+
+  getDeletedPasswordsApi() {
+    return this.http.get<{ success: boolean; passwords: IPassword[] }>(
+      '/user/password/deletedpasswords'
+    );
+  }
+
+  permenantDeletePassword(id: string) {
+    return this.http.delete<{ success: boolean; message: string }>(
+      '/user/password/premenantdelete/' + id
+    );
+  }
 }

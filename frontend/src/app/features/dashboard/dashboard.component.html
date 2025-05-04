@@ -1,110 +1,141 @@
 <app-toast></app-toast>
 
-<div class="min-h-screen bg-gradient-to-br from-blue-50 to-white font-sans flex">
+<div
+  class="min-h-screen bg-gradient-to-br from-blue-50 to-white font-sans flex"
+>
+  <!-- Mobile Sidebar (Drawer) -->
+  <p-drawer
+    [(visible)]="mobileSidebarOpen"
+    position="left"
+    [modal]="true"
+    styleClass="!w-full md:!w-80 lg:!w-[30rem]"
+  >
+    <div class="flex flex-col h-full p-6">
+      <!-- Logo -->
+      <div class="flex items-center mb-10 space-x-2">
+        <i class="pi pi-shield text-blue-700 text-[10rem]"></i>
+        <h1 class="text-2xl font-extrabold text-blue-700 leading-tight">
+          PassShield
+          <span class="text-xs block text-gray-400 font-medium">Dashboard</span>
+        </h1>
+      </div>
 
-    <!-- Mobile Sidebar (Drawer) -->
-    <p-drawer [(visible)]="mobileSidebarOpen" position="left" [modal]="true"
-        styleClass="!w-full md:!w-80 lg:!w-[30rem]">
-        <div class="flex flex-col h-full p-6">
-            <!-- Logo -->
-            <div class="flex items-center mb-10 space-x-2">
-                <i class="pi pi-shield text-blue-700 text-3xl"></i>
-                <h1 class="text-2xl font-extrabold text-blue-700 leading-tight">
-                    PassShield
-                    <span class="text-xs block text-gray-400 font-medium">Dashboard</span>
-                </h1>
-            </div>
+      <!-- Navigation -->
+      <p-panelMenu
+        [model]="menuItems"
+        class="border-none bg-transparent text-blue-900 flex-grow"
+      ></p-panelMenu>
 
-            <!-- Navigation -->
-            <p-panelMenu [model]="menuItems" class="border-none bg-transparent text-blue-900 flex-grow"></p-panelMenu>
+      <!-- Divider -->
+      <div class="mt-6 border-t border-gray-200 pt-4 space-y-3">
+        <!-- FAQ -->
+        <a
+          routerLink="/dashboard/faq"
+          class="flex items-center text-blue-700 hover:text-blue-900 transition space-x-2 text-sm font-medium"
+        >
+          <i class="pi pi-question-circle text-base"></i>
+          <span>FAQ</span>
+        </a>
 
-            <!-- Divider -->
-            <div class="mt-6 border-t border-gray-200 pt-4 space-y-3">
-                <!-- FAQ -->
-                <a routerLink="/dashboard/faq"
-                    class="flex items-center text-blue-700 hover:text-blue-900 transition space-x-2 text-sm font-medium">
-                    <i class="pi pi-question-circle text-base"></i>
-                    <span>FAQ</span>
-                </a>
+        <!-- Logout -->
+        <button
+          (click)="logout()"
+          class="w-full flex items-center justify-center text-red-600 hover:text-red-800 transition text-sm font-medium py-2 border border-red-200 rounded-lg"
+        >
+          <i class="pi pi-sign-out mr-2"></i>
+          Logout
+        </button>
+      </div>
 
-                <!-- Logout -->
-                <button (click)="logout()"
-                    class="w-full flex items-center justify-center text-red-600 hover:text-red-800 transition text-sm font-medium py-2 border border-red-200 rounded-lg">
-                    <i class="pi pi-sign-out mr-2"></i>
-                    Logout
-                </button>
-            </div>
+      <!-- Footer -->
+      <div class="mt-6 text-xs text-gray-500 text-center">
+        <p>&copy; 2025 PassShield</p>
+      </div>
+    </div>
+  </p-drawer>
 
-            <!-- Footer -->
-            <div class="mt-6 text-xs text-gray-500 text-center">
-                <p>&copy; 2025 PassShield</p>
-            </div>
+  <!-- Desktop Sidebar -->
+  <aside
+    class="hidden md:flex w-72 bg-white/90 backdrop-blur-md border-r border-blue-100 shadow-xl sticky top-0 h-screen flex-col p-6"
+  >
+    <!-- Logo -->
+    <div class="flex items-center mb-10 space-x-2">
+      <i class="pi pi-shield text-blue-700 text-3xl"></i>
+      <h1 class="text-2xl font-extrabold text-blue-700 leading-tight">
+        PassShield
+        <span class="text-xs block text-gray-400 font-medium">Dashboard</span>
+      </h1>
+    </div>
+
+    <!-- Navigation -->
+    <p-panelMenu
+      [model]="menuItems"
+      class="border-none bg-transparent text-blue-900 flex-grow"
+    ></p-panelMenu>
+
+    <!-- Divider -->
+    <div class="mt-6 border-t border-gray-200 pt-4 space-y-3">
+      <!-- FAQ -->
+      <a
+        routerLink="/dashboard/faq"
+        class="flex items-center text-blue-700 hover:text-blue-900 transition space-x-2 text-sm font-medium"
+      >
+        <i class="pi pi-question-circle text-base"></i>
+        <span>FAQ</span>
+      </a>
+
+      <!-- Logout -->
+      <button
+        (click)="logout()"
+        class="w-full flex items-center justify-center text-red-600 hover:text-red-800 transition text-sm font-medium py-2 border border-red-200 rounded-lg"
+      >
+        <i class="pi pi-sign-out mr-2"></i>
+        Logout
+      </button>
+    </div>
+
+    <!-- Footer -->
+    <div class="mt-6 text-xs text-gray-500 text-center">
+      <p>&copy; 2025 PassShield</p>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 flex flex-col">
+    <!-- Navbar -->
+    <header
+      class="sticky top-0 z-40 bg-white shadow-sm px-4 py-4 flex items-center justify-between md:px-6"
+    >
+      <div class="flex items-center space-x-3">
+        <!-- Mobile Menu Button -->
+        <button
+          (click)="toggleSidebar()"
+          class="md:hidden text-blue-600 focus:outline-none text-2xl"
+        >
+          <i class="pi pi-bars"></i>
+        </button>
+        <div class="inline-block">
+          <h2 class="text-3xl font-bold text-blue-800">
+            Welcome back, {{ userDetails.getCurrentUser()?.name | titlecase }}
+          </h2>
+          <div
+            class="h-1 w-24 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 rounded-full mt-2"
+          ></div>
         </div>
-    </p-drawer>
+      </div>
+      <a
+        routerLink="/dashboard/profile"
+        class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-all shadow-sm"
+      >
+        Profile
+      </a>
+    </header>
 
-    <!-- Desktop Sidebar -->
-    <aside
-        class="hidden md:flex w-72 bg-white/90 backdrop-blur-md border-r border-blue-100 shadow-xl sticky top-0 h-screen flex-col p-6">
-        <!-- Logo -->
-        <div class="flex items-center mb-10 space-x-2">
-            <i class="pi pi-shield text-blue-700 text-3xl"></i>
-            <h1 class="text-2xl font-extrabold text-blue-700 leading-tight">
-                PassShield
-                <span class="text-xs block text-gray-400 font-medium">Dashboard</span>
-            </h1>
-        </div>
-
-        <!-- Navigation -->
-        <p-panelMenu [model]="menuItems" class="border-none bg-transparent text-blue-900 flex-grow"></p-panelMenu>
-
-        <!-- Divider -->
-        <div class="mt-6 border-t border-gray-200 pt-4 space-y-3">
-            <!-- FAQ -->
-            <a routerLink="/dashboard/faq"
-                class="flex items-center text-blue-700 hover:text-blue-900 transition space-x-2 text-sm font-medium">
-                <i class="pi pi-question-circle text-base"></i>
-                <span>FAQ</span>
-            </a>
-
-            <!-- Logout -->
-            <button (click)="logout()"
-                class="w-full flex items-center justify-center text-red-600 hover:text-red-800 transition text-sm font-medium py-2 border border-red-200 rounded-lg">
-                <i class="pi pi-sign-out mr-2"></i>
-                Logout
-            </button>
-        </div>
-
-        <!-- Footer -->
-        <div class="mt-6 text-xs text-gray-500 text-center">
-            <p>&copy; 2025 PassShield</p>
-        </div>
-    </aside>
-
-    <!-- Main Content -->
-    <main class="flex-1 flex flex-col">
-        <!-- Navbar -->
-        <header class="sticky top-0 z-40 bg-white shadow-sm px-4 py-4 flex items-center justify-between md:px-6">
-            <div class="flex items-center space-x-3">
-                <!-- Mobile Menu Button -->
-                <button (click)="toggleSidebar()" class="md:hidden text-blue-600 focus:outline-none text-2xl">
-                    <i class="pi pi-bars"></i>
-                </button>
-                <div class="text-left space-y-1">
-                    <h2 class="text-2xl font-bold text-blue-400 tracking-tight">
-                        <span class="font-medium"> Welcome back </span>, <span class="text-blue-800">{{
-                            userDetails.getCurrentUser()?.name | titlecase }}</span>
-                    </h2>
-                </div>
-            </div>
-            <a routerLink="/dashboard/profile"
-                class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-all shadow-sm">
-                Profile
-            </a>
-        </header>
-
-        <!-- Page Content -->
-        <section class="flex-1 p-4 md:p-6 overflow-y-auto bg-gradient-to-t from-white via-white to-blue-50">
-            <router-outlet></router-outlet>
-        </section>
-    </main>
+    <!-- Page Content -->
+    <section
+      class="flex-1 p-4 md:p-6 overflow-y-auto bg-gradient-to-t from-white via-white to-blue-50"
+    >
+      <router-outlet></router-outlet>
+    </section>
+  </main>
 </div>

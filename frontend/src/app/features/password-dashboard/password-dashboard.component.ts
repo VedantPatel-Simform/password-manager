@@ -1,14 +1,7 @@
-import {
-  Component,
-  OnDestroy,
-  inject,
-  ChangeDetectorRef,
-  NgZone,
-} from '@angular/core';
+import { Component, OnDestroy, inject } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-
 // PrimeNG Modules
 import { DropdownModule, Dropdown, DropdownItem } from 'primeng/dropdown';
 import { InputText } from 'primeng/inputtext';
@@ -17,7 +10,7 @@ import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 
 // RxJS
-import { forkJoin, from, map, of, Subscription, switchMap } from 'rxjs';
+import { forkJoin, from, of, Subscription, switchMap } from 'rxjs';
 
 // Project Services and Utils
 import { PasswordService } from '../../core/services/password/password-service.service';
@@ -72,8 +65,6 @@ export class PasswordDashboardComponent implements OnDestroy {
   private keyService = inject(KeyStorageService);
   private toastService = inject(ToastService);
   private router = inject(Router);
-  private changeDetectorRef = inject(ChangeDetectorRef);
-  private ngZone = inject(NgZone);
 
   constructor() {
     this.passwordApiSub = this.passwordService.getPasswordsApi().subscribe({
@@ -91,47 +82,40 @@ export class PasswordDashboardComponent implements OnDestroy {
   private subscribeToPasswordChange(): void {
     this.passwordListSub = this.passwordService.$password
       .pipe(
-        switchMap((list) => {
-          // if empty, emit [] immediately
-          if (!list.length) {
+        switchMap((value) => {
+          if (value.length === 0) {
             return of([] as (IDecryptedPassword & { toggle: boolean })[]);
           }
-
-          // build an array of Observables, one per password
-          const decryptCalls = list.map((p) =>
-            // first decrypt the password
-            from(
-              decryptWithBase64Key(this.keyService.getDekKey()!, p.password)
-            ).pipe(
-              switchMap((decryptedPassword) =>
-                // then decrypt the notes (or resolve to empty string)
-                from(
-                  p.notes
-                    ? decryptWithBase64Key(
-                        this.keyService.getDekKey()!,
-                        p.notes
-                      )
-                    : Promise.resolve('')
-                ).pipe(
-                  // finally map both results into your decrypted shape
-                  map((decryptedNotes) => ({
-                    ...p,
-                    password: decryptedPassword,
-                    notes: decryptedNotes,
-                    toggle: false,
-                  }))
-                )
-              )
-            )
+          const decryptedPasswordsObservable = value.map((p) =>
+            from(this.decryptPassword(p))
           );
-
-          // forkJoin waits until *all* decryptCalls complete, then emits an array
-          return forkJoin(decryptCalls);
+          return forkJoin(decryptedPasswordsObservable);
         })
       )
-      .subscribe((decryptedArray) => {
-        this.decryptedPasswords = decryptedArray;
+      .subscribe((value) => {
+        console.log(value);
+
+        this.decryptedPasswords = value;
       });
+  }
+
+  async decryptPassword(
+    password: IPassword
+  ): Promise<IDecryptedPassword & { toggle: boolean }> {
+    const key = this.keyService.getDekKey()!;
+    const decryptedPassword = await decryptWithBase64Key(
+      key,
+      password.password
+    );
+    const decryptedNotes = password.notes
+      ? await decryptWithBase64Key(key, password.notes)
+      : '';
+    return {
+      ...password,
+      password: decryptedPassword,
+      notes: decryptedNotes,
+      toggle: false,
+    };
   }
 
   get filteredPasswords(): (IDecryptedPassword & { toggle: boolean })[] {
