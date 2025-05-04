@@ -26,6 +26,13 @@ import {
   IDecryptedPassword,
   IEncryptedField,
 } from '../../shared/interfaces/password.interface';
+import {
+  sortByDateAsc,
+  sortByDateDesc,
+  sortByUpdatedAsc,
+  sortByUpdatedDesc,
+} from '../../utils/sortFn.utils';
+import { SearchComponentComponent } from '../../shared/components/search-component/search-component.component';
 
 @Component({
   selector: 'app-password-dashboard',
@@ -39,6 +46,7 @@ import {
     InputGroupModule,
     InputGroupAddonModule,
     NgClass,
+    SearchComponentComponent,
   ],
   templateUrl: './password-dashboard.component.html',
   styleUrl: './password-dashboard.component.css',
@@ -46,11 +54,12 @@ import {
 export class PasswordDashboardComponent implements OnDestroy {
   searchTerm = '';
   selectedCategory = 'all';
-  sortOption = 'created';
+  sortOption = 'created_desc';
   loading = true;
 
   categoryOptions = categoryOptions;
   sortOptions = sortOptions;
+  sortFn: Function = sortByDateDesc;
 
   passwords: IPassword[] = [];
   decryptedPasswords: (IDecryptedPassword & { toggle: boolean })[] = [];
@@ -118,38 +127,6 @@ export class PasswordDashboardComponent implements OnDestroy {
     };
   }
 
-  get filteredPasswords(): (IDecryptedPassword & { toggle: boolean })[] {
-    let filtered = [...this.decryptedPasswords].filter((p) => !p.deleted);
-
-    if (this.selectedCategory !== 'all') {
-      filtered = filtered.filter((p) => p.category === this.selectedCategory);
-    }
-
-    if (this.searchTerm) {
-      const term = this.searchTerm.toLowerCase();
-      filtered = filtered.filter(
-        (p) =>
-          p.website.toLowerCase().includes(term) ||
-          p.email.toLowerCase().includes(term) ||
-          p.userName.toLowerCase().includes(term)
-      );
-    }
-
-    if (this.sortOption === 'created') {
-      filtered.sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
-    } else if (this.sortOption === 'updated') {
-      filtered.sort(
-        (a, b) =>
-          new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-      );
-    }
-
-    return filtered;
-  }
-
   copyField(password: string, type: 'email' | 'password') {
     if (type === 'email') {
       navigator.clipboard.writeText(password);
@@ -183,6 +160,18 @@ export class PasswordDashboardComponent implements OnDestroy {
 
   viewDetails(password: IDecryptedPassword & { toggle: boolean }): void {
     this.router.navigate(['/dashboard/passwords/', password._id]);
+  }
+
+  onSortChange(option: string) {
+    if (option === 'created_asc') {
+      this.sortFn = sortByDateAsc;
+    } else if (option === 'created_desc') {
+      this.sortFn = sortByDateDesc;
+    } else if (option === 'updated_asc') {
+      this.sortFn = sortByUpdatedAsc;
+    } else {
+      this.sortFn = sortByUpdatedDesc;
+    }
   }
 
   ngOnDestroy(): void {

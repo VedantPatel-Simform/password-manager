@@ -1,4 +1,3 @@
-import { Password } from './../../../../../backend/models/Password.model';
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -27,6 +26,10 @@ import {
   IPassword,
   IDecryptedPassword,
 } from '../../shared/interfaces/password.interface';
+import { SearchComponentComponent } from '../../shared/components/search-component/search-component.component';
+import { sortByDaysAsc, sortByDaysDesc } from '../../utils/sortFn.utils';
+
+export type DeletedPassword = IDecryptedPassword & { daysLeft: number };
 
 @Component({
   selector: 'app-recycle-bin',
@@ -40,6 +43,7 @@ import {
     InputGroupAddonModule,
     NgClass,
     ConfirmDialog,
+    SearchComponentComponent,
   ],
   standalone: true,
   templateUrl: './recycle-bin.component.html',
@@ -47,16 +51,19 @@ import {
   providers: [ConfirmationService],
 })
 export class RecycleBinComponent implements OnInit, OnDestroy {
-  deletedPasswords: (IDecryptedPassword & { daysLeft: number })[] = [];
+  deletedPasswords: DeletedPassword[] = [];
   passwordService = inject(PasswordService);
   keyService = inject(KeyStorageService);
   router = inject(Router);
   toastService = inject(ToastService);
   passwordListSub!: Subscription;
 
+  filteredPasswords: DeletedPassword[] = [];
+
   searchTerm!: string;
   selectedCategory!: string;
   sortOption!: string;
+  sortFn!: Function;
 
   sortOptions = [
     { label: 'Sort by Days Left (Ascending)', value: 'asc' },
@@ -70,7 +77,7 @@ export class RecycleBinComponent implements OnInit, OnDestroy {
     this.searchTerm = '';
     this.sortOption = 'asc';
     this.selectedCategory = 'all';
-
+    this.sortFn = sortByDaysAsc;
     this.passwordService.getDeletedPasswordsApi().subscribe({
       next: ({ passwords }) => {
         this.passwordService.setPasswords(passwords);
@@ -102,7 +109,6 @@ export class RecycleBinComponent implements OnInit, OnDestroy {
             daysLeft: this.getDaysRemaining(p.autoDeleteDate),
           };
         });
-        console.log('filtered passwords = ', this.filteredPasswords);
       });
   }
 
@@ -125,30 +131,16 @@ export class RecycleBinComponent implements OnInit, OnDestroy {
     };
   }
 
-  get filteredPasswords(): (IDecryptedPassword & { daysLeft: number })[] {
-    let filtered = [...this.deletedPasswords].filter((p) => p.deleted);
+  get filteredDeletedPasswords() {
+    return this.deletedPasswords.filter((p) => p.deleted);
+  }
 
-    if (this.selectedCategory !== 'all') {
-      filtered = filtered.filter((p) => p.category === this.selectedCategory);
+  onSortChange(a: string) {
+    if (a === 'asc') {
+      this.sortFn = sortByDaysAsc;
+    } else {
+      this.sortFn = sortByDaysDesc;
     }
-
-    if (this.searchTerm) {
-      const term = this.searchTerm.toLowerCase();
-      filtered = filtered.filter(
-        (p) =>
-          p.website.toLowerCase().includes(term) ||
-          p.email.toLowerCase().includes(term) ||
-          p.userName.toLowerCase().includes(term)
-      );
-    }
-
-    if (this.sortOption === 'asc') {
-      filtered.sort((a, b) => a.daysLeft - b.daysLeft);
-    } else if (this.sortOption === 'desc') {
-      filtered.sort((a, b) => b.daysLeft - a.daysLeft);
-    }
-
-    return filtered;
   }
 
   getDomainFromUrl(url: string): string {
@@ -163,7 +155,7 @@ export class RecycleBinComponent implements OnInit, OnDestroy {
     }
   }
 
-  restorePassword(password: IDecryptedPassword & { daysLeft: number }): void {
+  restorePassword(password: DeletedPassword): void {
     this.passwordService.restorePasswordApi(password._id).subscribe((value) => {
       this.toastService.showSuccess('Restored', value.message);
       this.router.navigate(['/dashboard/passwords']);
