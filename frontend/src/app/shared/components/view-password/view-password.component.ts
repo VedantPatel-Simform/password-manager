@@ -29,6 +29,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModalComponent } from '../password-modal/password-modal.component';
 import { ToastService } from '../../../core/services/toast/toast.service';
 import { categoryOptions } from '../../../core/constants/category.options';
+import { NgClass } from '@angular/common';
 @Component({
   selector: 'app-view-password',
   imports: [
@@ -39,6 +40,7 @@ import { categoryOptions } from '../../../core/constants/category.options';
     Select,
     InputTextModule,
     PasswordModalComponent,
+    NgClass,
   ],
   templateUrl: './view-password.component.html',
   styleUrl: './view-password.component.css',
@@ -63,6 +65,8 @@ export class ViewPasswordComponent implements OnInit, AfterViewInit {
   passwordVisible = false;
   selectedTab: 'password' | 'passphrase' = 'password';
   categoryOptions = categoryOptions.filter((val) => val.value !== 'all'); // to remove the all lable from the category as it is only for dashboard
+  formChanged = false;
+  initialFormValue!: IDecryptedPassword;
 
   @ViewChild('passwordModal') passwordModal!: PasswordModalComponent;
 
@@ -121,6 +125,22 @@ export class ViewPasswordComponent implements OnInit, AfterViewInit {
         [Validators.required],
       ],
       notes: [`${this.localDecryptedPassword.notes}`],
+    });
+    this.initialFormValue = this.passwordForm.getRawValue();
+
+    // Subscribe to form changes
+    this.passwordForm.valueChanges.subscribe((currentValue) => {
+      this.formChanged = Object.keys(currentValue).some((key) => {
+        const initialVal =
+          this.initialFormValue[key as keyof IDecryptedPassword];
+        const currentVal = currentValue[key as keyof IDecryptedPassword];
+
+        if (key === 'category') {
+          return initialVal !== this.category?.value;
+        }
+
+        return initialVal !== currentVal;
+      });
     });
   }
 
