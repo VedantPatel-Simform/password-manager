@@ -181,3 +181,47 @@ export const getPassword = expressAsyncHandler(
         });
     }
 );
+
+export const getDeletedPasswords = expressAsyncHandler(
+    async (req: Request<unknown, unknown, unknown>, res: Response) => {
+        const passwords = await Password.find({
+            userId: req.user.id,
+            deleted: true,
+            autoDeleteDate: { $gt: new Date() }, // delete date > current date
+        });
+
+        if (!passwords) {
+            throw new ApiError(
+                'Deleted Passwords not found',
+                HTTP_STATUS.NOT_FOUND.code
+            );
+        }
+
+        res.status(200).json({
+            success: true,
+            passwords,
+        });
+    }
+);
+
+export const permenantDeletePassword = expressAsyncHandler(
+    async (
+        req: Request<{ passwordId: string }, unknown, unknown>,
+        res: Response
+    ) => {
+        const { passwordId } = req.params;
+        const password = await Password.findByIdAndDelete(passwordId);
+
+        if (!password) {
+            throw new ApiError(
+                'Password not found',
+                HTTP_STATUS.NOT_FOUND.code
+            );
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Password permenantly deleted',
+        });
+    }
+);

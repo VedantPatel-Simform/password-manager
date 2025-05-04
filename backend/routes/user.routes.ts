@@ -3,7 +3,9 @@ import {
     allPasswordsController,
     deletePasswordController,
     editPasswordController,
+    getDeletedPasswords,
     getPassword,
+    permenantDeletePassword,
     restorePasswordController,
 } from '../controllers/user.controller.js';
 import { Router } from 'express';
@@ -26,5 +28,13 @@ router.get('/password/all', authHandler, allPasswordsController);
 router.put('/password/edit/:passwordId', authHandler, editPasswordController);
 
 router.get('/password/get/:passwordId', authHandler, getPassword);
+
+router.get('/password/deletedpasswords', authHandler, getDeletedPasswords);
+
+router.delete(
+    '/password/premenantdelete/:passwordId',
+    authHandler,
+    permenantDeletePassword
+);
 
 export default router;
