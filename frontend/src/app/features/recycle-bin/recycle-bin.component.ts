@@ -28,6 +28,7 @@ import {
 } from '../../shared/interfaces/password.interface';
 import { SearchComponentComponent } from '../../shared/components/search-component/search-component.component';
 import { sortByDaysAsc, sortByDaysDesc } from '../../utils/sortFn.utils';
+import { Dialog } from 'primeng/dialog';
 
 export type DeletedPassword = IDecryptedPassword & { daysLeft: number };
 
@@ -42,7 +43,7 @@ export type DeletedPassword = IDecryptedPassword & { daysLeft: number };
     InputGroupModule,
     InputGroupAddonModule,
     NgClass,
-    ConfirmDialog,
+    Dialog,
     SearchComponentComponent,
   ],
   standalone: true,
@@ -72,6 +73,9 @@ export class RecycleBinComponent implements OnInit, OnDestroy {
 
   categoryOptions = categoryOptions;
   loading = true;
+
+  deleteDialogVisible: boolean = false;
+  passwordIdToDelete: string | null = null;
 
   ngOnInit(): void {
     this.searchTerm = '';
@@ -133,6 +137,24 @@ export class RecycleBinComponent implements OnInit, OnDestroy {
 
   get filteredDeletedPasswords() {
     return this.deletedPasswords.filter((p) => p.deleted);
+  }
+
+  openDeleteDialog(id: string) {
+    this.passwordIdToDelete = id;
+    this.deleteDialogVisible = true;
+  }
+
+  confirmDelete() {
+    if (this.passwordIdToDelete) {
+      this.deletePassword(this.passwordIdToDelete);
+      this.passwordIdToDelete = null;
+      this.deleteDialogVisible = false;
+    }
+  }
+
+  cancelDelete() {
+    this.passwordIdToDelete = null;
+    this.deleteDialogVisible = false;
   }
 
   onSortChange(a: string) {

@@ -98,7 +98,7 @@
           <button
             pButton
             label="Delete"
-            (click)="deletePassword(password._id)"
+            (click)="openDeleteDialog(password._id)"
             severity="danger"
             class="flex-1 p-button-primary p-2 rounded-md shadow-sm hover:shadow-md transition-all duration-200 bg-red-500 text-white"
           ></button>
@@ -130,3 +130,34 @@
     }
   </div>
 </div>
+<p-dialog
+  header="Confirm Deletion"
+  [(visible)]="deleteDialogVisible"
+  [modal]="true"
+  [closable]="false"
+  [dismissableMask]="true"
+  styleClass="rounded-xl"
+  class="w-[90vw] md:w-[30vw] max-w-[30rem] text-2xl"
+>
+  <div class="text-gray-700 text-lg leading-relaxed break-words">
+    Are you sure you want to
+    <strong class="text-red-600">permanently delete</strong> this password?
+    <br />
+    <span class="block mt-1">Once deleted, it can't be recovered.</span>
+  </div>
+
+  <div class="flex justify-end space-x-3 mt-6">
+    <button
+      pButton
+      label="Cancel"
+      (click)="cancelDelete()"
+      class="p-button-secondary"
+    ></button>
+    <button
+      pButton
+      label="Delete"
+      (click)="confirmDelete()"
+      class="p-button-danger"
+    ></button>
+  </div>
+</p-dialog>
