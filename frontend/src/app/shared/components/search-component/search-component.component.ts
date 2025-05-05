@@ -1,16 +1,28 @@
 import { Component, DoCheck, EventEmitter, Input, Output } from '@angular/core';
-// PrimeNG Modules
-import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
 
-import { DropdownModule, Dropdown, DropdownItem } from 'primeng/dropdown';
+// Angular Modules
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+
+// PrimeNG Modules
+import { DropdownModule } from 'primeng/dropdown';
 import { InputText } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
+
 import Fuse from 'fuse.js';
+import { IDecryptedPassword } from '../../interfaces/password.interface';
+import { PasswordSortFn, DecryptedPassword } from '../../../utils/sortFn.utils';
+import { DeletedPassword } from '../../../features/recycle-bin/recycle-bin.component';
+
+type InputData =
+  | (IDecryptedPassword & { toggle: boolean })[]
+  | (IDecryptedPassword & { daysLeft: number })[];
+
 @Component({
   selector: 'app-search-component',
+  standalone: true,
   imports: [
     CommonModule,
     FormsModule,
@@ -21,32 +33,36 @@ import Fuse from 'fuse.js';
     InputGroupAddonModule,
   ],
   templateUrl: './search-component.component.html',
-  styleUrl: './search-component.component.css',
+  styleUrls: ['./search-component.component.css'],
 })
 export class SearchComponentComponent implements DoCheck {
   searchTerm: string = '';
   selectedCategory: string = 'all';
-  @Input('categoryOptions') categoryOptions: {
-    value: string;
-    label: string;
-  }[] = [];
-  @Input('sortOptions') sortOptions: {
-    value: string;
-    label: string;
-  }[] = [];
-  @Input('sortOption') sortOption: string = '';
-  @Input('data') data: any[] = [];
-  @Output('result') result = new EventEmitter<any[]>();
-  @Output('sortChange') sortChange = new EventEmitter<any>();
-  @Input('sortFun') sortFun: any;
-  filteredPasswords(): any {
+
+  @Input() categoryOptions: { value: string; label: string }[] = [];
+  @Input() sortOptions: { value: string; label: string }[] = [];
+  @Input() sortOption: string = '';
+  @Input() data: InputData = [];
+  @Input() sortFun!:
+    | PasswordSortFn<DeletedPassword>
+    | PasswordSortFn<DecryptedPassword>;
+
+  @Output() result = new EventEmitter<any[]>();
+  @Output() sortChange = new EventEmitter<any>();
+
+  ngDoCheck(): void {
+    this.filteredPasswords();
+  }
+
+  private filteredPasswords(): void {
     let filtered = [...this.data];
 
     if (this.selectedCategory !== 'all') {
-      filtered = filtered.filter((p) => p.category === this.selectedCategory);
+      filtered = filtered.filter(
+        (item) => item.category === this.selectedCategory
+      );
     }
 
-    // Fuzzy search
     if (this.searchTerm) {
       const term = this.searchTerm.toLowerCase();
 
@@ -64,21 +80,28 @@ export class SearchComponentComponent implements DoCheck {
 
       const combinedResults = [...fuzzyResults, ...exactResults];
       const seen = new Set();
+
       filtered = combinedResults.filter((item) => {
-        const key = item.id || item.email || JSON.stringify(item);
+        const key = item._id || item.email || JSON.stringify(item);
         if (seen.has(key)) return false;
         seen.add(key);
         return true;
       });
     }
 
-    filtered.sort(this.sortFun);
+    const isDeletedPassword = (item: any): item is DeletedPassword =>
+      'daysLeft' in item;
+    const isDecryptedPassword = (item: any): item is DecryptedPassword =>
+      'toggle' in item;
+
+    // Narrowing type of the array to DeletedPassword or DecryptedPassword
+    if (filtered.every(isDeletedPassword)) {
+      filtered.sort(this.sortFun as PasswordSortFn<DeletedPassword>);
+    } else if (filtered.every(isDecryptedPassword)) {
+      filtered.sort(this.sortFun as PasswordSortFn<DecryptedPassword>);
+    }
 
     this.result.emit(filtered);
     this.sortChange.emit(this.sortOption);
-  }
-
-  ngDoCheck(): void {
-    this.filteredPasswords();
   }
 }

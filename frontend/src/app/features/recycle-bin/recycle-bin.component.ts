@@ -27,7 +27,11 @@ import {
   IDecryptedPassword,
 } from '../../shared/interfaces/password.interface';
 import { SearchComponentComponent } from '../../shared/components/search-component/search-component.component';
-import { sortByDaysAsc, sortByDaysDesc } from '../../utils/sortFn.utils';
+import {
+  PasswordSortFn,
+  sortByDaysAsc,
+  sortByDaysDesc,
+} from '../../utils/sortFn.utils';
 import { Dialog } from 'primeng/dialog';
 
 export type DeletedPassword = IDecryptedPassword & { daysLeft: number };
@@ -64,7 +68,7 @@ export class RecycleBinComponent implements OnInit, OnDestroy {
   searchTerm!: string;
   selectedCategory!: string;
   sortOption!: string;
-  sortFn!: Function;
+  sortFn: PasswordSortFn<DeletedPassword> = sortByDaysAsc;
 
   sortOptions = [
     { label: 'Sort by Days Left (Ascending)', value: 'asc' },

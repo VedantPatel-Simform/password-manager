@@ -27,12 +27,14 @@ import {
   IEncryptedField,
 } from '../../shared/interfaces/password.interface';
 import {
+  PasswordSortFn,
   sortByDateAsc,
   sortByDateDesc,
   sortByUpdatedAsc,
   sortByUpdatedDesc,
 } from '../../utils/sortFn.utils';
 import { SearchComponentComponent } from '../../shared/components/search-component/search-component.component';
+import { DecryptedPassword } from '../../utils/sortFn.utils';
 
 @Component({
   selector: 'app-password-dashboard',
@@ -59,7 +61,7 @@ export class PasswordDashboardComponent implements OnDestroy {
 
   categoryOptions = categoryOptions;
   sortOptions = sortOptions;
-  sortFn: Function = sortByDateDesc;
+  sortFn: PasswordSortFn<DecryptedPassword> = sortByDateDesc;
 
   passwords: IPassword[] = [];
   decryptedPasswords: (IDecryptedPassword & { toggle: boolean })[] = [];

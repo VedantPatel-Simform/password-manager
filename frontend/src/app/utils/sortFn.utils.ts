@@ -1,28 +1,37 @@
 import { DeletedPassword } from '../features/recycle-bin/recycle-bin.component';
 import { IDecryptedPassword } from '../shared/interfaces/password.interface';
-type DecryptedPassword = IDecryptedPassword & {
+
+// Extended type for decrypted passwords used in sorting
+export type DecryptedPassword = IDecryptedPassword & {
   toggle: boolean;
 };
 
-// sort by days remaining
-export const sortByDaysAsc = (a: DeletedPassword, b: DeletedPassword) =>
+// Generic sort function type for password objects
+export type PasswordSortFn<T = DecryptedPassword | DeletedPassword> = (
+  a: T,
+  b: T
+) => number;
+
+// Sort by days remaining (ascending)
+export const sortByDaysAsc: PasswordSortFn<DeletedPassword> = (a, b) =>
   a.daysLeft - b.daysLeft;
 
-export const sortByDaysDesc = (a: DeletedPassword, b: DeletedPassword) =>
+// Sort by days remaining (descending)
+export const sortByDaysDesc: PasswordSortFn<DeletedPassword> = (a, b) =>
   b.daysLeft - a.daysLeft;
 
-// Sort by createdAt (oldest to newest)
-export const sortByDateAsc = (a: DecryptedPassword, b: DecryptedPassword) =>
+// Sort by creation date (oldest to newest)
+export const sortByDateAsc: PasswordSortFn<DecryptedPassword> = (a, b) =>
   new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
 
-// Sort by createdAt (newest to oldest)
-export const sortByDateDesc = (a: DecryptedPassword, b: DecryptedPassword) =>
+// Sort by creation date (newest to oldest)
+export const sortByDateDesc: PasswordSortFn<DecryptedPassword> = (a, b) =>
   new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
 
-// Sort by updatedAt (oldest to newest)
-export const sortByUpdatedAsc = (a: DecryptedPassword, b: DecryptedPassword) =>
+// Sort by updated date (oldest to newest)
+export const sortByUpdatedAsc: PasswordSortFn<DecryptedPassword> = (a, b) =>
   new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
 
-// Sort by updatedAt (newest to oldest)
-export const sortByUpdatedDesc = (a: DecryptedPassword, b: DecryptedPassword) =>
+// Sort by updated date (newest to oldest)
+export const sortByUpdatedDesc: PasswordSortFn<DecryptedPassword> = (a, b) =>
   new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
