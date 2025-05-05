@@ -106,7 +106,6 @@ export class AddPasswordComponent {
           'Created',
           'Password created successfully'
         );
-        console.log(res);
         this.passwordForm.reset();
       },
       error: (err) => {

@@ -102,8 +102,6 @@ export class PasswordDashboardComponent implements OnDestroy {
         })
       )
       .subscribe((value) => {
-        console.log(value);
-
         this.decryptedPasswords = value;
       });
   }

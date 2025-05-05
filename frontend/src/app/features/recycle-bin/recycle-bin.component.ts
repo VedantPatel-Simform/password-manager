@@ -180,7 +180,9 @@ export class RecycleBinComponent implements OnInit, OnDestroy {
   restorePassword(password: DeletedPassword): void {
     this.passwordService.restorePasswordApi(password._id).subscribe((value) => {
       this.toastService.showSuccess('Restored', value.message);
-      this.router.navigate(['/dashboard/passwords']);
+      this.deletedPasswords = this.deletedPasswords.filter(
+        (p) => p._id !== password._id
+      );
     });
   }
 

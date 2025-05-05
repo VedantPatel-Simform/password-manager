@@ -8,6 +8,7 @@ import { InputText } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
+import Fuse from 'fuse.js';
 @Component({
   selector: 'app-search-component',
   imports: [
@@ -25,9 +26,15 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 export class SearchComponentComponent implements DoCheck {
   searchTerm: string = '';
   selectedCategory: string = 'all';
-  @Input('categoryOptions') categoryOptions: any;
-  @Input('sortOptions') sortOptions: any;
-  @Input('sortOption') sortOption: any;
+  @Input('categoryOptions') categoryOptions: {
+    value: string;
+    label: string;
+  }[] = [];
+  @Input('sortOptions') sortOptions: {
+    value: string;
+    label: string;
+  }[] = [];
+  @Input('sortOption') sortOption: string = '';
   @Input('data') data: any[] = [];
   @Output('result') result = new EventEmitter<any[]>();
   @Output('sortChange') sortChange = new EventEmitter<any>();
@@ -39,19 +46,34 @@ export class SearchComponentComponent implements DoCheck {
       filtered = filtered.filter((p) => p.category === this.selectedCategory);
     }
 
+    // Fuzzy search
     if (this.searchTerm) {
       const term = this.searchTerm.toLowerCase();
-      filtered = filtered.filter(
-        (p) =>
-          p.website.toLowerCase().includes(term) ||
-          p.email.toLowerCase().includes(term) ||
-          p.userName.toLowerCase().includes(term)
+
+      const fuse = new Fuse(filtered, {
+        keys: ['website'],
+        threshold: 0.3,
+      });
+
+      const fuzzyResults = fuse.search(term).map((r) => r.item);
+      const exactResults = filtered.filter(
+        (item) =>
+          item.userName.toLowerCase().includes(term) ||
+          item.email.toLowerCase().includes(term)
       );
+
+      const combinedResults = [...fuzzyResults, ...exactResults];
+      const seen = new Set();
+      filtered = combinedResults.filter((item) => {
+        const key = item.id || item.email || JSON.stringify(item);
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
     }
 
     filtered.sort(this.sortFun);
 
-    console.log(filtered);
     this.result.emit(filtered);
     this.sortChange.emit(this.sortOption);
   }
