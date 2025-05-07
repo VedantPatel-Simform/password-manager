@@ -14,10 +14,24 @@ export class AuthService {
   private loggedInKey = 'loggedIn'; // Key for localStorage
   private registeredKey = 'registered'; // Key for localStorage
   private logoutKey = 'loggedOut';
-  private comingFrom: 'dashboard' | 'register' | 'login' | null = null;
+  private comingFrom:
+    | 'dashboard'
+    | 'register'
+    | 'login'
+    | 'editPassword'
+    | 'deletePassword'
+    | null = null;
   constructor(private http: HttpClient) {}
 
-  setComingFrom(val: 'dashboard' | 'register' | 'login' | null) {
+  setComingFrom(
+    val:
+      | 'dashboard'
+      | 'register'
+      | 'login'
+      | 'editPassword'
+      | 'deletePassword'
+      | null
+  ) {
     this.comingFrom = val;
   }
 

@@ -1,5 +1,3 @@
-<app-toast></app-toast>
-
 <div class="min-h-screen flex flex-col md:flex-row bg-gray-50">
 
     <!-- Left Side: Info -->
@@ -81,7 +79,7 @@
                 <div class="relative">
                     <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Master Password</label>
                     <input pInputText [type]="showPassword ? 'text' : 'password'" id="password"
-                        formControlName="password" autocomplete="new-password" placeholder="Minimum 8 characters"
+                        formControlName="password" autocomplete="new-password" placeholder="Minimum 12 characters"
                         class="w-full px-4 py-3 pr-12 rounded-lg border border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
                         [ngClass]="{ 'p-invalid': submitted && password?.invalid }" />
                     <button type="button" (click)="showPassword = !showPassword"

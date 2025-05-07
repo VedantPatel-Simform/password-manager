@@ -2,7 +2,7 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 
 export const httpInterceptor: HttpInterceptorFn = (req, next) => {
-  const baseUrl = 'http://localhost:3000';
+  const baseUrl = 'http://localhost:3000/api';
   const modifiedReq = req.clone({
     url: `${baseUrl}${req.url}`,
     withCredentials: true, // Optional: if you need cookies

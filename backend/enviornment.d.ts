@@ -10,6 +10,7 @@ declare global {
             MONGO_URI: string;
             CORS_ORIGIN: string;
             PASSWORD_BREACH_ENDPOINT: string;
+            AUTO_DELETE_AFTER_SECONDS: number;
         }
     }
 }
@@ -21,10 +22,10 @@ declare global {
                 jwt: string;
             };
 
-            user?: {
-                id?: string;
-                name?: string;
-                email?: string;
+            user: {
+                id: string;
+                name: string;
+                email: string;
             };
         }
         interface Response {
