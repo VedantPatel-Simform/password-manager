@@ -85,7 +85,6 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
       next: async (res) => {
         if (isLoginResponse(res)) {
           // Show success message using ToastService
-          this.toastService.showSuccess('success', res.message);
 
           const userEncKey = await generateBase64KeyFromPasswordAndSalt(
             this.password?.value,

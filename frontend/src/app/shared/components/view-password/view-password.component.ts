@@ -147,7 +147,10 @@ export class ViewPasswordComponent implements OnInit, AfterViewInit {
   onDelete(id: string) {
     this.passwordService.deletePasswordApi(id).subscribe({
       next: (value) => {
-        this.toastService.showSuccess('Success', value.message);
+        this.toastService.showSuccess(
+          'Success',
+          'Passsword sucessfully moved to recycle bin'
+        );
         this.router.navigate(['/dashboard/passwords']);
       },
       error: (err) => {

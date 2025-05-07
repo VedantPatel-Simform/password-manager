@@ -1,8 +1,6 @@
 <div class="p-2 space-y-6">
   <!-- heading -->
-  <div
-    class="flex items-center border-l-8 border-blue-600 bg-white p-4 rounded-xl shadow-lg space-x-4"
-  >
+  <div class="flex items-center border-l-8 border-blue-600 bg-white p-4 rounded-xl shadow-lg space-x-4">
     <div>
       <h2 class="text-3xl font-bold text-blue-800">Recycle Bin</h2>
       <p class="text-sm text-gray-500">
@@ -12,15 +10,9 @@
   </div>
 
   <!-- Search, Filter, Sort Controls -->
-  <app-search-component
-    [categoryOptions]="categoryOptions"
-    [sortOptions]="sortOptions"
-    [sortOption]="sortOption"
-    [data]="filteredDeletedPasswords"
-    (result)="filteredPasswords = $event"
-    [sortFun]="sortFn"
-    (sortChange)="onSortChange($event)"
-  ></app-search-component>
+  <app-search-component [categoryOptions]="categoryOptions" [sortOptions]="sortOptions" [sortOption]="sortOption"
+    [data]="filteredDeletedPasswords" (result)="filteredPasswords = $event" [sortFun]="sortFn"
+    (sortChange)="onSortChange($event)"></app-search-component>
 
   <!-- Additional CSS -->
   <style>
@@ -43,16 +35,12 @@
     <div>
       @for (password of filteredPasswords; track password._id) {
       <div
-        class="mb-6 flex flex-col md:flex-row items-center justify-between p-6 bg-white shadow-lg rounded-2xl hover:shadow-xl transition-shadow duration-300 ease-in-out"
-      >
+        class="mb-6 flex flex-col md:flex-row items-center justify-between p-6 bg-white shadow-lg rounded-2xl hover:shadow-xl transition-shadow duration-300 ease-in-out">
         <!-- Left: Logo + Website & Username -->
         <div class="flex items-center space-x-4 w-full md:w-1/4">
           <!-- Display the website logo as an image -->
-          <img
-            [src]="'https://img.logo.dev/' + getDomainFromUrl(password.website)"
-            alt="{{ password.website }} logo"
-            class="w-10 h-10 rounded-md"
-          />
+          <img [src]="'https://img.logo.dev/' + getDomainFromUrl(password.website)" alt="{{ password.website }} logo"
+            class="w-10 h-10 rounded-md" />
 
           <div>
             <div class="font-semibold text-blue-800 text-lg">
@@ -64,58 +52,38 @@
 
         <!-- Middle: Email ID (Hidden on small screens) -->
         <div
-          class="flex items-center justify-center space-x-3 w-full md:w-1/4 justify-center mt-3 md:mt-0 md:block hidden"
-        >
-          <div
-            class="flex items-center space-x-2 text-gray-600 font-bold text-base"
-          >
+          class="flex items-center justify-center space-x-3 w-full md:w-1/4 justify-center mt-3 md:mt-0 md:block hidden">
+          <div class="flex items-center space-x-2 text-gray-600 font-bold text-base">
             <span>{{ password.email }}</span>
           </div>
         </div>
 
         <!-- Right: Days Remaining Badge with PrimeIcons -->
-        <div
-          class="w-full md:w-1/4 mt-3 md:mt-0 hidden md:flex items-center justify-center"
-        >
-          <div
-            class="flex items-center gap-2 px-3 py-1 text-sm font-semibold rounded-2xl shadow-sm border text-center"
+        <div class="w-full md:w-1/4 mt-3 md:mt-0 hidden md:flex items-center justify-center">
+          <div class="flex items-center gap-2 px-3 py-1 text-sm font-semibold rounded-2xl shadow-sm border text-center"
             [ngClass]="{
               'bg-green-100 text-green-700 border-green-300':
-                password.daysLeft > 7,
+                password.daysLeft > 14,
               'bg-yellow-100 text-yellow-800 border-yellow-300':
-                password.daysLeft <= 7 && password.daysLeft > 2,
-              'bg-red-100 text-red-700 border-red-300': password.daysLeft <= 2
-            }"
-          >
+                password.daysLeft <= 14 && password.daysLeft > 3,
+              'bg-red-100 text-red-700 border-red-300': password.daysLeft <= 3
+            }">
             <i class="pi pi-clock text-sm"></i>
             {{ password.daysLeft }} days left
           </div>
         </div>
 
-        <div
-          class="flex items-center justify-end w-full md:w-1/4 mt-3 md:mt-0 space-x-3"
-        >
-          <button
-            pButton
-            label="Delete"
-            (click)="openDeleteDialog(password._id)"
-            severity="danger"
-            class="flex-1 p-button-primary p-2 rounded-md shadow-sm hover:shadow-md transition-all duration-200 bg-red-500 text-white"
-          ></button>
-          <button
-            pButton
-            label="Restore"
-            (click)="restorePassword(password)"
-            class="flex-1 p-button-primary p-2 rounded-md shadow-sm hover:shadow-md transition-all duration-200 bg-blue-500 text-white"
-          ></button>
+        <div class="flex items-center justify-end w-full md:w-1/4 mt-3 md:mt-0 space-x-3">
+          <button pButton label="Delete" (click)="openDeleteDialog(password._id)" severity="danger"
+            class="flex-1 p-button-primary p-2 rounded-md shadow-sm hover:shadow-md transition-all duration-200 bg-red-500 text-white"></button>
+          <button pButton label="Restore" (click)="restorePassword(password)"
+            class="flex-1 p-button-primary p-2 rounded-md shadow-sm hover:shadow-md transition-all duration-200 bg-blue-500 text-white"></button>
         </div>
       </div>
       }
     </div>
     } @else {
-    <div
-      class="flex flex-col items-center justify-center text-center py-20 text-gray-500"
-    >
+    <div class="flex flex-col items-center justify-center text-center py-20 text-gray-500">
       <div class="bg-blue-100 text-blue-600 p-6 rounded-full shadow-inner">
         <i class="pi pi-inbox text-9xl"></i>
       </div>
@@ -130,15 +98,8 @@
     }
   </div>
 </div>
-<p-dialog
-  header="Confirm Deletion"
-  [(visible)]="deleteDialogVisible"
-  [modal]="true"
-  [closable]="false"
-  [dismissableMask]="true"
-  styleClass="rounded-xl"
-  class="w-[90vw] md:w-[30vw] max-w-[30rem] text-2xl"
->
+<p-dialog header="Confirm Deletion" [(visible)]="deleteDialogVisible" [modal]="true" [closable]="false"
+  [dismissableMask]="true" styleClass="rounded-xl" class="w-[90vw] md:w-[30vw] max-w-[30rem] text-2xl">
   <div class="text-gray-700 text-lg leading-relaxed break-words">
     Are you sure you want to
     <strong class="text-red-600">permanently delete</strong> this password?
@@ -147,17 +108,7 @@
   </div>
 
   <div class="flex justify-end space-x-3 mt-6">
-    <button
-      pButton
-      label="Cancel"
-      (click)="cancelDelete()"
-      class="p-button-secondary"
-    ></button>
-    <button
-      pButton
-      label="Delete"
-      (click)="confirmDelete()"
-      class="p-button-danger"
-    ></button>
+    <button pButton label="Cancel" (click)="cancelDelete()" class="p-button-secondary"></button>
+    <button pButton label="Delete" (click)="confirmDelete()" class="p-button-danger"></button>
   </div>
 </p-dialog>
