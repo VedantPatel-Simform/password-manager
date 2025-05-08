@@ -146,16 +146,14 @@ export class PasswordDashboardComponent implements OnDestroy {
     alert(`Password: ${decrypted}`);
   }
 
-  getDomainFromUrl(url: string): string {
-    try {
-      if (!url.startsWith('http://') && !url.startsWith('https://')) {
-        url = 'https://' + url;
-      }
-      return new URL(url).hostname;
-    } catch {
-      console.error('Invalid URL:', url);
-      return '';
+  getDomainFromUrl(url: string): { hostname: string; pathname: string } {
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      url = 'https://' + url;
     }
+    return {
+      hostname: new URL(url).hostname,
+      pathname: new URL(url).hostname + '?token=pk_FceobK6OTIKRrKmZpV7KBQ',
+    };
   }
 
   viewDetails(password: IDecryptedPassword & { toggle: boolean }): void {

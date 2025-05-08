@@ -9,6 +9,9 @@ import { AddPasswordComponent } from './features/add-password/add-password.compo
 import { PasswordDashboardComponent } from './features/password-dashboard/password-dashboard.component';
 import { ViewPasswordComponent } from './shared/components/view-password/view-password.component';
 import { RecycleBinComponent } from './features/recycle-bin/recycle-bin.component';
+import { SentByMeComponent } from './features/sent-by-me/sent-by-me.component';
+import { ReceivedByMeComponent } from './features/recieved-by-me/recieved-by-me.component';
+import { SharePasswordComponent } from './features/share-password/share-password.component';
 export const routes: Routes = [
   { path: '', component: LandingPageComponent, canActivate: [authGuard] },
 
@@ -51,6 +54,23 @@ export const routes: Routes = [
       {
         path: 'recycle-bin',
         component: RecycleBinComponent,
+      },
+      {
+        path: 'shared',
+        pathMatch: 'full',
+        redirectTo: 'shared/sent',
+      },
+      {
+        path: 'shared/share',
+        component: SharePasswordComponent,
+      },
+      {
+        path: 'shared/sent',
+        component: SentByMeComponent,
+      },
+      {
+        path: 'shared/received',
+        component: ReceivedByMeComponent,
       },
       // Add more child routes here
     ],

@@ -5,21 +5,21 @@ import {
   Validators,
   ReactiveFormsModule,
   FormsModule,
-  NgModel,
 } from '@angular/forms';
-import { PasswordService } from '../../core/services/password/password-service.service';
 import { ToastService } from '../../core/services/toast/toast.service';
 import { Dialog } from 'primeng/dialog';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { Select } from 'primeng/select';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModalComponent } from '../../shared/components/password-modal/password-modal.component';
-import { PasswordBody } from '../../shared/interfaces/password.interface';
+import { SharedPasswordBody } from '../../shared/interfaces/PasswordShare.interface';
+import { DatePicker } from 'primeng/datepicker';
+import { PasswordSentService } from '../../core/services/password/password-sent.service';
 
 @Component({
-  selector: 'app-add-password',
-  templateUrl: './add-password.component.html',
-  styleUrls: ['./add-password.component.css'],
+  selector: 'app-share-password',
+  templateUrl: './share-password.component.html',
+  styleUrls: ['./share-password.component.css'],
   standalone: true,
   imports: [
     ReactiveFormsModule,
@@ -29,9 +29,10 @@ import { PasswordBody } from '../../shared/interfaces/password.interface';
     Select,
     InputTextModule,
     PasswordModalComponent,
+    DatePicker,
   ],
 })
-export class AddPasswordComponent {
+export class SharePasswordComponent {
   passwordForm: FormGroup;
   showGenerator = false;
   generatedPassword = '';
@@ -50,6 +51,8 @@ export class AddPasswordComponent {
     { label: 'Other', value: 'other' },
   ];
 
+  minDate = new Date();
+
   websiteRegex =
     /^(https?:\/\/)?(www\.)?[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\/[\w\-._~:/?#[\]@!$&'()*+,;=%]*)?$/;
 
@@ -64,10 +67,17 @@ export class AddPasswordComponent {
 
   constructor(
     private fb: FormBuilder,
-    private passwordService: PasswordService,
+    private sharePasswordService: PasswordSentService,
     private toastService: ToastService
   ) {
     this.passwordForm = this.fb.group({
+      receiverMail: [
+        '',
+        [
+          Validators.required,
+          Validators.pattern(/^[\w\-\.]+@([\w\-]+\.)+[\w\-]{2,4}$/),
+        ],
+      ],
       website: [
         '',
         [Validators.required, Validators.pattern(this.websiteRegex)],
@@ -83,6 +93,7 @@ export class AddPasswordComponent {
       password: ['', Validators.required],
       category: ['', Validators.required],
       notes: [''],
+      expireDate: [''],
     });
   }
 
@@ -99,17 +110,14 @@ export class AddPasswordComponent {
       return;
     }
 
-    const formData = this.passwordForm.value as PasswordBody;
-    this.passwordService.createPasswordApi(formData).subscribe({
-      next: (res) => {
-        this.toastService.showSuccess(
-          'Created',
-          'Password created successfully'
-        );
-        this.passwordForm.reset();
+    const formData = this.passwordForm.value as SharedPasswordBody;
+    this.sharePasswordService.sendPassword(formData).subscribe({
+      next: (value) => {
+        console.log(value);
+        this.toastService.showSuccess('Successfully Shared', value.message);
       },
-      error: (err) => {
-        this.toastService.showError('Error', err.message);
+      error: (err: any) => {
+        this.toastService.showError('Error', err.toString());
       },
     });
   }
@@ -149,5 +157,13 @@ export class AddPasswordComponent {
 
   get notes() {
     return this.passwordForm.get('notes');
+  }
+
+  get receiverMail() {
+    return this.passwordForm.get('receiverMail');
+  }
+
+  get expireDate() {
+    return this.passwordForm.get('expireDate');
   }
 }

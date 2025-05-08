@@ -190,13 +190,6 @@ export const getDeletedPasswords = expressAsyncHandler(
             autoDeleteDate: { $gt: new Date() }, // delete date > current date
         });
 
-        if (!passwords) {
-            throw new ApiError(
-                'Deleted Passwords not found',
-                HTTP_STATUS.NOT_FOUND.code
-            );
-        }
-
         res.status(200).json({
             success: true,
             passwords,

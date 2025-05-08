@@ -98,14 +98,19 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       icon: 'pi pi-share-alt',
       items: [
         {
+          label: 'Share Password',
+          icon: 'pi pi-plus-circle',
+          routerLink: ['/dashboard/shared/share'],
+        },
+        {
           label: 'Shared By Me',
           icon: 'pi pi-user-plus',
-          routerLink: ['/dashboard/shared/by-me'],
+          routerLink: ['/dashboard/shared/sent'],
         },
         {
           label: 'Shared With Me',
           icon: 'pi pi-users',
-          routerLink: ['/dashboard/shared/with-me'],
+          routerLink: ['/dashboard/shared/received'],
         },
       ],
     },
