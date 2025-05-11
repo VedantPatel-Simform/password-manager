@@ -1,10 +1,13 @@
 import { DeletedPassword } from '../features/recycle-bin/recycle-bin.component';
+import { IDecryptedPasswordShare } from '../shared/interfaces/PasswordShare.interface';
 import { IDecryptedPassword } from '../shared/interfaces/password.interface';
 
 // Extended type for decrypted passwords used in sorting
-export type DecryptedPassword = IDecryptedPassword & {
-  toggle: boolean;
-};
+export type DecryptedPassword =
+  | (IDecryptedPassword & {
+      toggle: boolean;
+    })
+  | IDecryptedPasswordShare;
 
 // Generic sort function type for password objects
 export type PasswordSortFn<T = DecryptedPassword | DeletedPassword> = (

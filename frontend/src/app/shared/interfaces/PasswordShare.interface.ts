@@ -57,3 +57,22 @@ export type SharedPasswordSendBody = {
     iv: string;
   };
 };
+
+export interface IDecryptedPasswordShare {
+  senderId: string;
+  senderPublicEncPEK: string;
+  senderMail: string;
+  receiverId: string;
+  receiverPublicEncPEK: string;
+  receiverMail: string;
+  website: string;
+  email: string;
+  userName: string;
+  category: CategoryValue;
+  password: string;
+  notes: string;
+  _id: string;
+  createdAt: Date;
+  updatedAt: Date;
+  expireDate?: Date;
+}

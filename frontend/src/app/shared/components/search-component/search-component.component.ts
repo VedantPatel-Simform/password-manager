@@ -1,3 +1,4 @@
+import { IDecryptedPassword } from './../../interfaces/password.interface';
 import { Component, DoCheck, EventEmitter, Input, Output } from '@angular/core';
 
 // Angular Modules
@@ -12,14 +13,14 @@ import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 
 import Fuse from 'fuse.js';
-import { IDecryptedPassword } from '../../interfaces/password.interface';
 import { PasswordSortFn, DecryptedPassword } from '../../../utils/sortFn.utils';
 import { DeletedPassword } from '../../../features/recycle-bin/recycle-bin.component';
+import { IDecryptedPasswordShare } from '../../interfaces/PasswordShare.interface';
 
 type InputData =
   | (IDecryptedPassword & { toggle: boolean })[]
-  | (IDecryptedPassword & { daysLeft: number })[];
-
+  | (IDecryptedPassword & { daysLeft: number })[]
+  | IDecryptedPasswordShare[];
 @Component({
   selector: 'app-search-component',
   standalone: true,
@@ -37,12 +38,13 @@ type InputData =
 })
 export class SearchComponentComponent implements DoCheck {
   searchTerm: string = '';
-  selectedCategory: string = 'all';
+  selectedFilteredValue: string = 'all';
 
   @Input() categoryOptions: { value: string; label: string }[] = [];
   @Input() sortOptions: { value: string; label: string }[] = [];
   @Input() sortOption: string = '';
   @Input() data: InputData = [];
+  @Input() filterKey: 'category' | 'receiverMail' = 'category';
   @Input() sortFun!:
     | PasswordSortFn<DeletedPassword>
     | PasswordSortFn<DecryptedPassword>;
@@ -57,10 +59,11 @@ export class SearchComponentComponent implements DoCheck {
   private filteredPasswords(): void {
     let filtered = [...this.data];
 
-    if (this.selectedCategory !== 'all') {
-      filtered = filtered.filter(
-        (item) => item.category === this.selectedCategory
-      );
+    if (this.selectedFilteredValue !== 'all') {
+      filtered = filtered.filter((item) => {
+        const value = (item as any)[this.filterKey];
+        return value === this.selectedFilteredValue;
+      });
     }
 
     if (this.searchTerm) {
@@ -92,7 +95,7 @@ export class SearchComponentComponent implements DoCheck {
     const isDeletedPassword = (item: any): item is DeletedPassword =>
       'daysLeft' in item;
     const isDecryptedPassword = (item: any): item is DecryptedPassword =>
-      'toggle' in item;
+      'toggle' in item || 'receiverMail' in item;
 
     // Narrowing type of the array to DeletedPassword or DecryptedPassword
     if (filtered.every(isDeletedPassword)) {
