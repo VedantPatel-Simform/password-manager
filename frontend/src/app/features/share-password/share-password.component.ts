@@ -15,6 +15,7 @@ import { PasswordModalComponent } from '../../shared/components/password-modal/p
 import { SharedPasswordBody } from '../../shared/interfaces/PasswordShare.interface';
 import { DatePicker } from 'primeng/datepicker';
 import { PasswordSentService } from '../../core/services/password/password-sent.service';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-share-password',
@@ -116,8 +117,9 @@ export class SharePasswordComponent {
         console.log(value);
         this.toastService.showSuccess('Successfully Shared', value.message);
       },
-      error: (err: any) => {
-        this.toastService.showError('Error', err.toString());
+      error: (err: HttpErrorResponse) => {
+        console.log(err.error);
+        this.toastService.showError('Error', err.error.message);
       },
     });
   }

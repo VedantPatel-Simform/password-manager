@@ -22,6 +22,7 @@ import {
   sortByUpdatedAsc,
   sortByUpdatedDesc,
 } from '../../utils/sortFn.utils';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-sent-by-me',
@@ -43,6 +44,8 @@ export class SentByMeComponent implements OnInit {
   sortOption = 'created_desc';
   sortOptions = sortOptions;
   sortFn: PasswordSortFn<DecryptedPassword> = sortByDateDesc;
+
+  router = inject(Router);
 
   categoryOptionList = signal<{ label: string; value: string }[]>([]);
   ngOnInit(): void {
@@ -154,5 +157,9 @@ export class SentByMeComponent implements OnInit {
       this.toastService.showSuccess('Copied', 'Password Copied to clipboard');
       return;
     }
+  }
+
+  managePassword(id: string) {
+    this.router.navigate(['dashboard/shared/manage', id]);
   }
 }

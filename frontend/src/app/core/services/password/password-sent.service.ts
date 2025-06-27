@@ -74,7 +74,7 @@ export class PasswordSentService {
 
           console.log('send data = ', sendData);
           return this.http.post<{ success: boolean; message: string }>(
-            '/user/shared/sharepassword',
+            '/user/shared/',
             sendData
           );
         } else {
@@ -87,8 +87,23 @@ export class PasswordSentService {
 
   getSentByMePasswords() {
     return this.http.get<{ success: boolean; passwords: IPasswordShare[] }>(
-      '/user/shared/shared'
+      '/user/shared/'
     );
   }
+
+  getPasswordDetails(passwordId: string) {
+    return this.http.get<{ success: boolean; password: IPasswordShare }>(
+      `/user/shared/${passwordId}`
+    );
+  }
+
+  deletePasswordApi(passwordId: string) {
+    return this.http.delete<{
+      success: boolean;
+      message: string;
+    }>(`/user/shared/${passwordId}`);
+  }
+
+  editPasswordApi(data: SharedPasswordSendBody & { _id: string }) {}
   constructor() {}
 }

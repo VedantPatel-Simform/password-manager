@@ -1,5 +1,9 @@
 import { CategoryValue, PasswordBody } from './password.interface';
 
+type ChangeTypes<T, K extends keyof T, U> = {
+  [P in keyof T]: P extends K ? U : T[P];
+};
+
 export interface IPasswordShare {
   senderId: string;
   senderPublicEncPEK: string;

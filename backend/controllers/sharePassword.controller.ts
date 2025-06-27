@@ -111,3 +111,26 @@ export const getSentByMePasswords = expressAsyncHandler(
         });
     }
 );
+
+export const getSharedPasswordDetails = expressAsyncHandler(
+    async (req: Request<{ passwordId: string }>, res: Response) => {
+        const passwordId = req.params.passwordId;
+        const SharedPasswordDetails =
+            await SharedPasswords.findById(passwordId);
+        res.status(HTTP_STATUS.OK.code).json({
+            success: true,
+            password: SharedPasswordDetails,
+        });
+    }
+);
+
+export const deletePassword = expressAsyncHandler(
+    async (req: Request<{ passwordId: string }>, res: Response) => {
+        const passwordId = req.params.passwordId;
+        await SharedPasswords.findByIdAndDelete(passwordId);
+        res.status(HTTP_STATUS.OK.code).json({
+            success: true,
+            message: 'Password successfully Deleted',
+        });
+    }
+);
