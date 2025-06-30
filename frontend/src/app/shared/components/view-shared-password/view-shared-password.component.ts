@@ -40,8 +40,11 @@ import {
   IPasswordShare,
   SharedPasswordBody,
 } from '../../interfaces/PasswordShare.interface';
+
 @Component({
   selector: 'app-view-shared-password',
+  templateUrl: './view-shared-password.component.html',
+  styleUrl: './view-shared-password.component.css',
   imports: [
     ReactiveFormsModule,
     Dialog,
@@ -53,41 +56,46 @@ import {
     NgClass,
     DatePicker,
   ],
-  templateUrl: './view-shared-password.component.html',
-  styleUrl: './view-shared-password.component.css',
 })
 export class ViewSharedPasswordComponent {
   activatedRouter = inject(ActivatedRoute);
   passwordService = inject(PasswordSentService);
   keyService = inject(KeyStorageService);
   fb = inject(FormBuilder);
-  privateKey = this.keyService.getPrivateKey() as string;
   toastService = inject(ToastService);
-  localPassword!: IPasswordShare;
-  localDecryptedPassword!: IDecryptedPasswordShare;
+  router = inject(Router);
+
+  privateKey = this.keyService.getPrivateKey()!;
   passwordId!: string;
   passwordForm!: FormGroup;
-  router = inject(Router);
+  localPassword!: IPasswordShare;
+  localDecryptedPassword!: IDecryptedPasswordShare;
+  initialFormValue!: IDecryptedPassword;
+
   websiteRegex =
     /^((https?|ftp|smtp):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/;
+
+  categoryOptions = categoryOptions.filter((val) => val.value !== 'all');
+  minDate = new Date();
 
   showGenerator = false;
   generatedPassword = '';
   passwordVisible = false;
   selectedTab: 'password' | 'passphrase' = 'password';
-  categoryOptions = categoryOptions.filter((val) => val.value !== 'all'); // to remove the all lable from the category as it is only for dashboard
+  visible = false;
+  deleteDialogVisible = false;
   formChanged = false;
-  initialFormValue!: IDecryptedPassword;
-  minDate = new Date();
 
   @ViewChild('passwordModal') passwordModal!: PasswordModalComponent;
 
   ngOnInit() {
-    this.passwordId = this.activatedRouter.snapshot.params['id'];
+    this.passwordId = this.activatedRouter.snapshot.paramMap.get('id')!;
+
     this.passwordService
       .getPasswordDetails(this.passwordId)
       .subscribe(async (res) => {
         this.localPassword = res.password;
+
         const decryptedPasswordPEK = await decryptWithPrivateKey(
           this.privateKey,
           this.localPassword.senderPublicEncPEK
@@ -100,16 +108,17 @@ export class ViewSharedPasswordComponent {
 
         const decryptedNotes = this.localPassword.notes
           ? await decryptWithBase64Key(
-              this.privateKey,
+              decryptedPasswordPEK,
               this.localPassword.notes
             )
           : '';
+
         this.localDecryptedPassword = {
           ...this.localPassword,
           password: decryptedPassword,
           notes: decryptedNotes,
         };
-
+        console.log(new Date(this.localDecryptedPassword.expireDate!));
         this.initForm();
       });
   }
@@ -117,7 +126,7 @@ export class ViewSharedPasswordComponent {
   initForm() {
     this.passwordForm = this.fb.group({
       website: [
-        `${this.localDecryptedPassword.website || ''}`,
+        this.localDecryptedPassword.website || '',
         [Validators.required, Validators.pattern(this.websiteRegex)],
       ],
       userName: [this.localDecryptedPassword.userName, Validators.required],
@@ -128,30 +137,25 @@ export class ViewSharedPasswordComponent {
           Validators.pattern(/^[\w\-\.]+@([\w\-]+\.)+[\w\-]{2,4}$/),
         ],
       ],
-      password: [
-        `${this.localDecryptedPassword.password}`,
-        Validators.required,
-      ],
+      password: [this.localDecryptedPassword.password, Validators.required],
       category: [
         this.categoryOptions.find(
           (val) => val.value === this.localDecryptedPassword.category
         ),
-        [Validators.required],
+        Validators.required,
       ],
-      notes: [`${this.localDecryptedPassword.notes}`],
-      expireDate: [`${this.localDecryptedPassword.expireDate}`],
+      notes: [this.localDecryptedPassword.notes],
+      expireDate: [new Date(this.localDecryptedPassword.expireDate!)],
       receiverMail: [
         {
-          value: `${this.localDecryptedPassword.receiverMail}`,
+          value: this.localDecryptedPassword.receiverMail,
           disabled: true,
         },
       ],
     });
-    this.initialFormValue = this.passwordForm.getRawValue();
 
-    console.log('Initial value');
-    console.table(this.initialFormValue);
-    // Subscribe to form changes
+    this.initialFormValue = this.passwordForm.getRawValue();
+    console.log(this.initialFormValue);
     this.passwordForm.valueChanges.subscribe((currentValue) => {
       this.formChanged = Object.keys(currentValue).some((key) => {
         const initialVal =
@@ -167,18 +171,6 @@ export class ViewSharedPasswordComponent {
     });
   }
 
-  onDelete(id: string) {
-    this.passwordService.deletePasswordApi(id).subscribe({
-      next: (value) => {
-        this.toastService.showSuccess('Success', value.message);
-        this.router.navigate(['/dashboard/shared/sent']);
-      },
-      error: (err) => {
-        this.toastService.showError('Error', err.message);
-      },
-    });
-  }
-
   generatePassword(): void {
     const chars =
       'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?';
@@ -188,7 +180,7 @@ export class ViewSharedPasswordComponent {
   }
 
   useGeneratedPassword(): void {
-    this.passwordForm.get('password')?.setValue(this.generatedPassword);
+    this.password?.setValue(this.generatedPassword);
     this.showGenerator = false;
   }
 
@@ -199,6 +191,26 @@ export class ViewSharedPasswordComponent {
 
   showDialog() {
     this.visible = true;
+  }
+
+  openDeleteDialog() {
+    this.deleteDialogVisible = true;
+  }
+
+  cancelDelete() {
+    this.deleteDialogVisible = false;
+  }
+
+  confirmDelete() {
+    this.passwordService.deletePasswordApi(this.passwordId).subscribe({
+      next: (value) => {
+        this.toastService.showSuccess('Success', value.message);
+        this.router.navigate(['/dashboard/shared/sent']);
+      },
+      error: (err) => {
+        this.toastService.showError('Error', err.message);
+      },
+    });
   }
 
   onSubmit(): void {
@@ -213,13 +225,13 @@ export class ViewSharedPasswordComponent {
     const formData: SharedPasswordBody & { _id: string } =
       this.passwordForm.value;
     formData._id = this.localDecryptedPassword._id;
+
     console.log(formData);
+
+    // Uncomment when endpoint is ready
     // this.passwordService.editPasswordApi(formData).subscribe({
     //   next: (res) => {
-    //     this.toastService.showSuccess(
-    //       'Created',
-    //       'Password Updated successfully'
-    //     );
+    //     this.toastService.showSuccess('Created', 'Password Updated successfully');
     //     this.router.navigate(['/dashboard/passwords']);
     //   },
     //   error: (err) => {
@@ -228,8 +240,7 @@ export class ViewSharedPasswordComponent {
     // });
   }
 
-  visible: boolean = false;
-
+  // Getters for form controls
   get website() {
     return this.passwordForm.get('website');
   }

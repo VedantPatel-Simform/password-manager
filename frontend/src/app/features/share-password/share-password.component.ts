@@ -112,6 +112,7 @@ export class SharePasswordComponent {
     }
 
     const formData = this.passwordForm.value as SharedPasswordBody;
+    console.log(formData);
     this.sharePasswordService.sendPassword(formData).subscribe({
       next: (value) => {
         console.log(value);
