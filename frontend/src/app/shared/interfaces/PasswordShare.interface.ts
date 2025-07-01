@@ -80,3 +80,41 @@ export interface IDecryptedPasswordShare {
   updatedAt: Date;
   expireDate?: Date;
 }
+
+export interface IEditSharedPasswordBody {
+  senderId: string;
+  senderMail: string;
+  receiverId: string;
+  receiverMail: string;
+  website: string;
+  email: string;
+  userName: string;
+  category: CategoryValue;
+  password: string;
+  notes?: string;
+  _id: string;
+  expireDate?: Date;
+}
+
+export interface IEditSharedPassword {
+  senderId: string;
+  senderPublicEncPEK: string;
+  senderMail: string;
+  receiverId: string;
+  receiverPublicEncPEK: string;
+  receiverMail: string;
+  website: string;
+  email: string;
+  userName: string;
+  category: CategoryValue;
+  password: {
+    cipherText: string;
+    iv: string;
+  };
+  notes?: {
+    cipherText: string;
+    iv: string;
+  };
+  _id: string;
+  expireDate?: Date;
+}

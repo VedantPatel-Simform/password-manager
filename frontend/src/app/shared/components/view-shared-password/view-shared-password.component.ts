@@ -37,9 +37,11 @@ import { NgClass } from '@angular/common';
 import { PasswordSentService } from '../../../core/services/password/password-sent.service';
 import {
   IDecryptedPasswordShare,
+  IEditSharedPasswordBody,
   IPasswordShare,
   SharedPasswordBody,
 } from '../../interfaces/PasswordShare.interface';
+import { catchError, mergeMap, of } from 'rxjs';
 
 @Component({
   selector: 'app-view-shared-password',
@@ -71,7 +73,7 @@ export class ViewSharedPasswordComponent {
   localPassword!: IPasswordShare;
   localDecryptedPassword!: IDecryptedPasswordShare;
   initialFormValue!: IDecryptedPassword;
-
+  passwordPEK!: string;
   websiteRegex =
     /^((https?|ftp|smtp):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/;
 
@@ -96,19 +98,19 @@ export class ViewSharedPasswordComponent {
       .subscribe(async (res) => {
         this.localPassword = res.password;
 
-        const decryptedPasswordPEK = await decryptWithPrivateKey(
+        this.passwordPEK = await decryptWithPrivateKey(
           this.privateKey,
           this.localPassword.senderPublicEncPEK
         );
 
         const decryptedPassword = await decryptWithBase64Key(
-          decryptedPasswordPEK,
+          this.passwordPEK,
           res.password.password
         );
 
         const decryptedNotes = this.localPassword.notes
           ? await decryptWithBase64Key(
-              decryptedPasswordPEK,
+              this.passwordPEK,
               this.localPassword.notes
             )
           : '';
@@ -145,7 +147,11 @@ export class ViewSharedPasswordComponent {
         Validators.required,
       ],
       notes: [this.localDecryptedPassword.notes],
-      expireDate: [new Date(this.localDecryptedPassword.expireDate!)],
+      expireDate: [
+        this.localDecryptedPassword.expireDate
+          ? new Date(this.localDecryptedPassword.expireDate)
+          : null,
+      ],
       receiverMail: [
         {
           value: this.localDecryptedPassword.receiverMail,
@@ -222,22 +228,37 @@ export class ViewSharedPasswordComponent {
       return;
     }
 
-    const formData: SharedPasswordBody & { _id: string } =
-      this.passwordForm.value;
+    const formData: Required<SharedPasswordBody> & {
+      _id: string;
+    } = this.passwordForm.value;
     formData._id = this.localDecryptedPassword._id;
 
-    console.log(formData);
-
-    // Uncomment when endpoint is ready
-    // this.passwordService.editPasswordApi(formData).subscribe({
-    //   next: (res) => {
-    //     this.toastService.showSuccess('Created', 'Password Updated successfully');
-    //     this.router.navigate(['/dashboard/passwords']);
-    //   },
-    //   error: (err) => {
-    //     this.toastService.showError('Error', err.message);
-    //   },
-    // });
+    const formBody: IEditSharedPasswordBody = {
+      senderId: this.localDecryptedPassword.senderId,
+      senderMail: this.localDecryptedPassword.senderMail,
+      receiverId: this.localDecryptedPassword.receiverId,
+      receiverMail: this.localDecryptedPassword.receiverMail,
+      website: formData.website,
+      email: formData.email,
+      userName: formData.userName,
+      category: formData.category.value,
+      password: formData.password,
+      notes: formData.notes,
+      _id: this.localDecryptedPassword._id,
+      expireDate: formData.expireDate,
+    };
+    this.passwordService
+      .editPasswordApi(
+        formBody,
+        this.passwordPEK,
+        this.localDecryptedPassword.senderPublicEncPEK
+      )
+      .pipe(mergeMap((res) => res))
+      .subscribe({
+        next: (res) => {
+          console.log(res.body);
+        },
+      });
   }
 
   // Getters for form controls

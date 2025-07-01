@@ -1,6 +1,8 @@
 import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, map, mergeMap, switchMap } from 'rxjs';
 import {
+  IEditSharedPassword,
+  IEditSharedPasswordBody,
   IPasswordShare,
   SharedPasswordBody,
   SharedPasswordSendBody,
@@ -104,6 +106,43 @@ export class PasswordSentService {
     }>(`/user/shared/${passwordId}`);
   }
 
-  editPasswordApi(data: SharedPasswordSendBody & { _id: string }) {}
+  editPasswordApi(
+    data: IEditSharedPasswordBody,
+    passwordPEK: string,
+    senderPubPEK: string
+  ) {
+    return this.verifyMail(data.receiverMail).pipe(
+      switchMap(async (res) => {
+        if (res.success) {
+          const receiverPublickKey = res.receiver.publicKey;
+          const encPassword = await encryptWithBase64Key(
+            passwordPEK,
+            data.password
+          );
+          const encNotes = data.notes
+            ? await encryptWithBase64Key(passwordPEK, data.notes)
+            : undefined;
+          const receiverPublicEncPEK = await encryptWithPublicKey(
+            res.receiver.publicKey,
+            passwordPEK
+          );
+          const passwordSendBody: IEditSharedPassword = {
+            ...data,
+            password: encPassword,
+            notes: encNotes,
+            receiverPublicEncPEK: receiverPublicEncPEK,
+            senderPublicEncPEK: senderPubPEK,
+          };
+
+          return this.http.put<{
+            success: boolean;
+            body: IEditSharedPassword;
+          }>('/user/shared', passwordSendBody);
+        } else {
+          throw new Error('Email verification failed');
+        }
+      })
+    );
+  }
   constructor() {}
 }

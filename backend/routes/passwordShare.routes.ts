@@ -4,6 +4,7 @@ import {
     addSharedPassword,
     checkReceiverMail,
     deletePassword,
+    editPassword,
     getSentByMePasswords,
     getSharedPasswordDetails,
 } from '../controllers/sharePassword.controller.js';
@@ -14,4 +15,5 @@ router.post('/', authHandler, addSharedPassword);
 router.get('/', authHandler, getSentByMePasswords);
 router.get('/:passwordId', authHandler, getSharedPasswordDetails);
 router.delete('/:passwordId', authHandler, deletePassword);
+router.put('/', authHandler, editPassword);
 export default router;

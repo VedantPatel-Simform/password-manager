@@ -5,6 +5,7 @@ import { User } from '../models/User.model.js';
 import { ApiError } from '../utils/ApiError.utils.js';
 import { HTTP_STATUS } from '../constants/http.status.js';
 import { SharedPasswords } from '../models/PasswordShare.model.js';
+import { IEditSharedPassword } from '../interfaces/PasswordShare.interface.js';
 
 type SharedPasswordBody = {
     receiverMail: string;
@@ -131,6 +132,16 @@ export const deletePassword = expressAsyncHandler(
         res.status(HTTP_STATUS.OK.code).json({
             success: true,
             message: 'Password successfully Deleted',
+        });
+    }
+);
+
+export const editPassword = expressAsyncHandler(
+    (req: Request<unknown, unknown, IEditSharedPassword>, res: Response) => {
+        const body = req.body;
+        res.status(HTTP_STATUS.OK.code).json({
+            success: true,
+            body,
         });
     }
 );
