@@ -42,6 +42,8 @@ import {
   SharedPasswordBody,
 } from '../../interfaces/PasswordShare.interface';
 import { catchError, mergeMap, of } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
+import { IError } from '../../interfaces/error.interface';
 
 @Component({
   selector: 'app-view-shared-password',
@@ -257,6 +259,11 @@ export class ViewSharedPasswordComponent {
       .subscribe({
         next: (res) => {
           console.log(res.body);
+          this.router.navigate(['dashboard/shared/sent']);
+        },
+        error: (err: HttpErrorResponse) => {
+          const error: IError = err.error;
+          this.toastService.showError('Error', error.message);
         },
       });
   }

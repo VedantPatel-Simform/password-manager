@@ -137,11 +137,37 @@ export const deletePassword = expressAsyncHandler(
 );
 
 export const editPassword = expressAsyncHandler(
-    (req: Request<unknown, unknown, IEditSharedPassword>, res: Response) => {
+    async (
+        req: Request<unknown, unknown, IEditSharedPassword>,
+        res: Response
+    ) => {
         const body = req.body;
+        const password = await SharedPasswords.findById(body._id);
+        if (!password) {
+            throw new ApiError(
+                'Password not found',
+                HTTP_STATUS.NOT_FOUND.code
+            );
+        }
+        password.senderId = body.senderId;
+        password.senderPublicEncPEK = body.senderPublicEncPEK;
+        password.senderMail = body.senderMail;
+        password.receiverId = body.receiverId;
+        password.receiverPublicEncPEK = body.receiverPublicEncPEK;
+        password.receiverMail = body.receiverMail;
+        password.website = body.website;
+        password.email = body.email;
+        password.userName = body.userName;
+        password.category = body.category;
+        password.password = body.password;
+        if (body.notes) {
+            password.notes = body.notes;
+        }
+        password.expireDate = body.expireDate;
+        const newPassword = await password.save();
         res.status(HTTP_STATUS.OK.code).json({
             success: true,
-            body,
+            newPassword,
         });
     }
 );
