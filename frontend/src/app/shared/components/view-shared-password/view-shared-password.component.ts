@@ -254,7 +254,7 @@ export class ViewSharedPasswordComponent {
       .pipe(mergeMap((res) => res))
       .subscribe({
         next: (res) => {
-          console.log(res.body);
+          this.toastService.showSuccess('Success', 'Password Updated');
           this.router.navigate(['dashboard/shared/sent']);
         },
         error: (err: HttpErrorResponse) => {

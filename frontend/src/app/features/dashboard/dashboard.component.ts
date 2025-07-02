@@ -89,6 +89,11 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       routerLink: ['/dashboard/add-password'],
     },
     {
+      label: 'Upload CSV',
+      icon: 'pi pi-file',
+      routerLink: ['/dashboard/upload-csv'],
+    },
+    {
       label: 'Password Dashboard',
       icon: 'pi pi-lock',
       routerLink: ['/dashboard/passwords'],
