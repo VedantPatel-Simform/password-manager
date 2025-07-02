@@ -6,13 +6,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { PasswordService } from '../../../core/services/password/password-service.service';
-import {
-  CategoryValue,
-  IDecryptedPassword,
-  IPassword,
-  PasswordBody,
-} from '../../interfaces/password.interface';
+import { IDecryptedPassword } from '../../interfaces/password.interface';
 import { KeyStorageService } from '../../../core/services/User/key-storage.service';
 import {
   decryptWithBase64Key,
@@ -41,9 +35,10 @@ import {
   IPasswordShare,
   SharedPasswordBody,
 } from '../../interfaces/PasswordShare.interface';
-import { catchError, mergeMap, of } from 'rxjs';
+import { mergeMap, of } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { IError } from '../../interfaces/error.interface';
+import { ButtonModule } from 'primeng/button';
 
 @Component({
   selector: 'app-view-shared-password',
@@ -59,6 +54,7 @@ import { IError } from '../../interfaces/error.interface';
     PasswordModalComponent,
     NgClass,
     DatePicker,
+    ButtonModule,
   ],
 })
 export class ViewSharedPasswordComponent {
