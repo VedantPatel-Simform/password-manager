@@ -61,3 +61,32 @@ export interface IDecryptedPassword {
   deletedTimeStamp?: Date;
   autoDeleteDate?: Date;
 }
+
+export interface IPasswordCsvItem {
+  website: string;
+  userName: string;
+  email: string;
+  password: string;
+  category: CategoryValue;
+  notes?: string;
+}
+
+export interface IPasswordCsvRow {
+  [key: string]: string | undefined;
+  website?: string;
+  userName?: string;
+  email?: string;
+  password?: string;
+  category?: string;
+  notes?: string;
+}
+
+export interface INormalizedPasswordCsvRow {
+  [key: string]: string | undefined;
+  website: string;
+  userName: string;
+  email: string;
+  password: string;
+  category?: string;
+  notes?: string;
+}

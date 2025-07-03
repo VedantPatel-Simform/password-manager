@@ -1,0 +1,77 @@
+<div
+    class="w-full max-w-2xl mx-auto bg-white/90 backdrop-blur-sm p-8 rounded-3xl shadow-lg space-y-6 border border-gray-200/60 hover:shadow-xl transition-shadow duration-300">
+    <!-- Header -->
+    <div class="text-center space-y-2">
+        <div class="inline-flex items-center justify-center w-14 h-14 bg-blue-50 rounded-full mb-3">
+            <i class="pi pi-upload text-2xl text-blue-600"></i>
+        </div>
+        <h2 class="text-2xl font-bold text-gray-800">
+            Import Passwords via CSV
+        </h2>
+        <p class="text-sm text-gray-500">Upload a properly formatted CSV file to bulk import your passwords.</p>
+    </div>
+
+    <!-- Upload Section -->
+    <form [formGroup]="uploadForm" (ngSubmit)="onSubmit()" class="space-y-4">
+        <div class="space-y-2">
+            <label class="block">
+                <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer hover:border-blue-400 transition-colors"
+                    (click)="fileInput.click()">
+                    <i class="pi pi-cloud-upload text-3xl text-blue-500 mb-2"></i>
+                    @if (!selectedFile) {
+                    <p class="text-gray-600 mb-0">Drag and drop files here or click to browse</p>
+                    } @else {
+                    <p class="text-gray-600 mb-0 font-medium">
+                        {{ selectedFile.name }} ({{ selectedFile.size | filesize }})
+                    </p>
+                    }
+                    <p class="text-xs text-gray-400 mt-2">CSV files only</p>
+                </div>
+                <input #fileInput type="file" accept=".csv" (change)="onFileSelect($event)" class="hidden"
+                    formControlName="csvFile">
+            </label>
+
+            <button type="submit"
+                class="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-xl text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:transform-none"
+                [disabled]="!uploadForm.valid">
+                <i class="pi pi-upload"></i>
+                <span>Process CSV File</span>
+            </button>
+        </div>
+    </form>
+
+    <!-- Divider -->
+    <div class="relative">
+        <div class="absolute inset-0 flex items-center" aria-hidden="true">
+            <div class="w-full border-t border-gray-200/60"></div>
+        </div>
+        <div class="relative flex justify-center">
+            <span class="px-2 bg-white text-xs text-gray-400">OR</span>
+        </div>
+    </div>
+
+    <!-- Download Format Section -->
+    <div>
+        <button type="button"
+            class="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-xl text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5"
+            (click)="downloadSampleCSV()">
+            <i class="pi pi-download"></i>
+            <span>Download Sample CSV Format</span>
+        </button>
+    </div>
+
+    <!-- Help Text -->
+    <div class="bg-blue-50/50 p-4 rounded-lg border border-blue-100">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <i class="pi pi-question-circle text-blue-500 mt-0.5"></i>
+            </div>
+            <div class="ml-3">
+                <h3 class="text-sm font-medium text-blue-800">Need help formatting your CSV?</h3>
+                <div class="mt-2 text-sm text-blue-700">
+                    <p>Our sample file includes all required columns with example data to ensure successful imports.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

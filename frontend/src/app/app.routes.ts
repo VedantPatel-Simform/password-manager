@@ -13,6 +13,7 @@ import { SentByMeComponent } from './features/sent-by-me/sent-by-me.component';
 import { ReceivedByMeComponent } from './features/recieved-by-me/recieved-by-me.component';
 import { SharePasswordComponent } from './features/share-password/share-password.component';
 import { ViewSharedPasswordComponent } from './shared/components/view-shared-password/view-shared-password.component';
+import { UploadCsvComponent } from './features/upload-csv/upload-csv.component';
 export const routes: Routes = [
   { path: '', component: LandingPageComponent, canActivate: [authGuard] },
 
@@ -35,6 +36,10 @@ export const routes: Routes = [
         path: '',
         pathMatch: 'full',
         redirectTo: 'passwords',
+      },
+      {
+        path: 'upload-csv',
+        component: UploadCsvComponent,
       },
       {
         path: 'generate-password',
