@@ -5,4 +5,5 @@ const router = Router();
 
 router.use('/authentication', authRouter);
 router.use('/user', userRouter);
+
 export default router;

@@ -1,12 +1,12 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import 'dotenv/config'; // new syntax
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import { errorHandler } from './middlewares/errorHandler.middleware.js';
 import { initDB } from './configs/db.config.js';
-import router from './routes/Routes.js';
 import morgan from 'morgan';
+import router from './routes/Routes.js';
 const app = express();
 
 app.use(
@@ -21,6 +21,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 // eslint-disable-next-line @typescript-eslint/no-unsafe-call
 app.use(morgan('tiny'));
+
+app.get('/', (req: Request, res: Response) => {
+    res.send('Password Manager server working');
+});
 
 app.use('/api', router);
 

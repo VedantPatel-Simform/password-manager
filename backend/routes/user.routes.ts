@@ -10,6 +10,7 @@ import {
 } from '../controllers/user.controller.js';
 import { Router } from 'express';
 import { authHandler } from '../middlewares/authentication.middleware.js';
+import shareRouter from './passwordShare.routes.js';
 const router = Router();
 
 router.post('/password/add', authHandler, addPasswordController);
@@ -36,5 +37,7 @@ router.delete(
     authHandler,
     permenantDeletePassword
 );
+
+router.use('/shared', authHandler, shareRouter);
 
 export default router;

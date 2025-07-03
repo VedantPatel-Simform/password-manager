@@ -39,12 +39,12 @@
         <!-- Left: Logo + Website & Username -->
         <div class="flex items-center space-x-4 w-full md:w-1/4">
           <!-- Display the website logo as an image -->
-          <img [src]="'https://img.logo.dev/' + getDomainFromUrl(password.website)" alt="{{ password.website }} logo"
-            class="w-10 h-10 rounded-md" />
+          <img [src]="'https://img.logo.dev/' + getDomainFromUrl(password.website).pathname"
+            alt="{{ password.website }} logo" class="w-10 h-10 rounded-md" />
 
           <div>
             <div class="font-semibold text-blue-800 text-lg">
-              {{ getDomainFromUrl(password.website) }}
+              {{ getDomainFromUrl(password.website).hostname }}
             </div>
             <div class="text-sm text-gray-500">{{ password.userName }}</div>
           </div>
