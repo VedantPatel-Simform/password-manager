@@ -1,0 +1,70 @@
+node_modules/** 
+# For suggestions or improvements please contact us using support@git-tower.com
+# Generated on 2025-04-07
+# Includes: express, angular
+
+### Universal ###
+# Common files that should be ignored in all projects
+
+# Logs
+*.log
+# Temporary files
+*.tmp
+*~
+
+*.bak
+# Environment files (containing secrets, API keys, credentials)
+.env
+*.env
+
+# Local configuration that shouldn't be shared
+*.local
+
+### Express ###
+# express specific files
+
+node_modules/
+logs/
+*.log
+
+### Angular ###
+# Angular build files, dependencies, and IDE settings
+
+dist/
+tmp/
+out-tsc/
+bazel-out
+node_modules/
+
+npm-debug.log
+yarn-error.log
+.idea/
+.project
+.classpath
+
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+.vscode/*
+
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/*
+
+app/**/*.js
+app/**/*.js.map
+bower_components/
+.sass-cache/
+connect.lock/
+
+coverage/
+libpeerconnection.log
+testem.log
+typings/
+.angular/
+
+e2e/*.js
+e2e/*.map
