@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import * as Papa from 'papaparse';
 import { BehaviorSubject } from 'rxjs';
 import {
@@ -6,13 +6,22 @@ import {
   IPasswordCsvItem,
   IPasswordCsvRow,
   INormalizedPasswordCsvRow,
+  IPassword,
+  EncryptedPasswordBody,
 } from '../../shared/interfaces/password.interface';
 import { categoryPatterns } from './categoryPatterns.constants';
+import { encryptWithBase64Key } from '../../utils/crypto.utils';
+import { KeyStorageService } from '../../core/services/User/key-storage.service';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root',
 })
 export class UploadCsvService {
+  private keyService = inject(KeyStorageService);
+  private http = inject(HttpClient);
+
+  success = signal<{ success?: boolean; message?: string }>({});
   private readonly validCategories: CategoryValue[] = [
     'social_media',
     'work_professional',
@@ -50,6 +59,13 @@ export class UploadCsvService {
     'password',
   ];
 
+  private sendPasswordApi(passwords: EncryptedPasswordBody[]) {
+    return this.http.post<{
+      success: true;
+      message: string;
+    }>('/user/password/add/', passwords);
+  }
+
   private uploadFile(file: File): Promise<IPasswordCsvItem[]> {
     return new Promise((resolve, reject) => {
       Papa.parse(file, {
@@ -72,9 +88,38 @@ export class UploadCsvService {
     });
   }
 
+  private async encryptPassword(
+    password: IPasswordCsvItem
+  ): Promise<EncryptedPasswordBody> {
+    const key = this.keyService.getDekKey()!;
+    const encPass = await encryptWithBase64Key(key, password.password);
+    const encNotes =
+      password.notes !== undefined
+        ? await encryptWithBase64Key(key, password.notes)
+        : undefined;
+
+    return {
+      ...password,
+      password: encPass,
+      notes: encNotes,
+    };
+  }
+
+  private async encryptPasswords(data: IPasswordCsvItem[]) {
+    const key = this.keyService.getDekKey()!;
+    const encryptedPasswords = data.map((d) => this.encryptPassword(d));
+    return await Promise.all(encryptedPasswords);
+  }
+
   public async processFile(file: File) {
     const passwords = await this.uploadFile(file);
-    console.log(passwords);
+    const encryptedPasswords = await this.encryptPasswords(passwords);
+    this.sendPasswordApi(encryptedPasswords).subscribe((value) => {
+      this.success.set({
+        success: true,
+        message: value.message,
+      });
+    });
   }
 
   private validateAndTransformCsvData(

@@ -41,6 +41,15 @@ export interface PasswordBody {
   notes?: string;
 }
 
+export interface EncryptedPasswordBody {
+  website: string;
+  userName: string;
+  email: string;
+  password: IEncryptedField;
+  category: CategoryValue;
+  notes?: IEncryptedField;
+}
+
 export type PasswordType = Pick<
   IPassword,
   'email' | 'website' | 'userName' | 'password' | 'category' | 'notes'

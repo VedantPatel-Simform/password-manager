@@ -79,7 +79,7 @@ export class PasswordService {
         };
         return this.http.post<{ success: boolean; password: IPassword }>(
           '/user/password/add/',
-          sendPassword
+          [sendPassword]
         );
       })
     );

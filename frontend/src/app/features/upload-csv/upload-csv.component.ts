@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import {
   FileSelectEvent,
   FileUpload,
@@ -16,21 +16,38 @@ import {
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { FileSizePipe } from './filesize.pipe';
+import { Router } from '@angular/router';
+
 @Component({
   selector: 'app-upload-csv',
   imports: [ButtonModule, ReactiveFormsModule, CommonModule, FileSizePipe],
   templateUrl: './upload-csv.component.html',
   styleUrl: './upload-csv.component.css',
 })
-export class UploadCsvComponent {
+export class UploadCsvComponent implements OnInit {
   uploadForm: FormGroup;
   selectedFile: File | null = null;
   uploadService = inject(UploadCsvService);
-
+  router = inject(Router);
+  toast = inject(ToastService);
   constructor(private fb: FormBuilder) {
     this.uploadForm = this.fb.group({
       csvFile: [null, Validators.required],
     });
+  }
+
+  ngOnInit(): void {
+    if (
+      this.uploadService.success().success == true &&
+      typeof this.uploadService.success().message === 'string'
+    ) {
+      this.toast.showSuccess(
+        'Passwords successfully added',
+        this.uploadService.success().message!
+      );
+      this.uploadService.success.set({});
+      this.router.navigate(['dashboard']);
+    }
   }
 
   onFileSelect(event: Event) {
@@ -53,7 +70,10 @@ export class UploadCsvComponent {
 
   downloadSampleCSV() {
     const sampleContent =
-      'name,username,password,url\nExample,user1,pass123,https://example.com';
+      'website,userName,email,password,category,notes\n' +
+      'facebook.com,john_doe,john@example.com,J0hnP@ss123,social_media,"Personal account"\n' +
+      'linkedin.com,jane_smith,jane@example.com,J@neSecure456,work_professional,"Work profile"';
+
     const blob = new Blob([sampleContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
