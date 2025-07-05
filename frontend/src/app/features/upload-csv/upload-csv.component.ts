@@ -37,17 +37,12 @@ export class UploadCsvComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    if (
-      this.uploadService.success().success == true &&
-      typeof this.uploadService.success().message === 'string'
-    ) {
-      this.toast.showSuccess(
-        'Passwords successfully added',
-        this.uploadService.success().message!
-      );
-      this.uploadService.success.set({});
-      this.router.navigate(['dashboard']);
-    }
+    this.uploadService.success$.subscribe((value) => {
+      if (value.message) {
+        this.toast.showSuccess('Successful', value.message);
+        this.router.navigate(['dashboard']);
+      }
+    });
   }
 
   onFileSelect(event: Event) {
@@ -62,7 +57,11 @@ export class UploadCsvComponent implements OnInit {
 
   onSubmit() {
     if (this.uploadForm.valid && this.selectedFile) {
-      this.uploadService.processFile(this.selectedFile);
+      try {
+        this.uploadService.processFile(this.selectedFile);
+      } catch (err: any) {
+        this.toast.showError('Error', err.message);
+      }
     } else {
       alert('error');
     }
