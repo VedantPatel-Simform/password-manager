@@ -244,3 +244,20 @@ export const permenantDeletePassword = expressAsyncHandler(
         });
     }
 );
+
+export const deleteAllPasswordsController = expressAsyncHandler(
+    async (req: Request<{ userId: string }>, res: Response) => {
+        const { userId } = req.params;
+
+        const result = await Password.deleteMany({
+            userId: userId,
+            // remove the below comment after testing
+            // deleted: true,
+        });
+
+        res.status(200).json({
+            success: true,
+            message: `Successfully deleted ${result.deletedCount} passwords`,
+        });
+    }
+);

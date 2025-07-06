@@ -27,6 +27,10 @@ export class UploadCsvService {
     message?: string;
   }>({});
   success$ = this.success.asObservable();
+
+  setSuccess(data: { success?: boolean; message?: string }) {
+    this.success.next(data);
+  }
   private readonly validCategories: CategoryValue[] = [
     'social_media',
     'work_professional',
@@ -101,32 +105,68 @@ export class UploadCsvService {
     });
   }
 
-  private async encryptPassword(
-    password: IPasswordCsvItem
-  ): Promise<EncryptedPasswordBody> {
-    const key = this.keyService.getDekKey()!;
-    const encPass = await encryptWithBase64Key(key, password.password);
-    const encNotes =
-      password.notes !== undefined
-        ? await encryptWithBase64Key(key, password.notes)
-        : undefined;
+  // private async encryptPassword(
+  //   password: IPasswordCsvItem
+  // ): Promise<EncryptedPasswordBody> {
+  //   const key = this.keyService.getDekKey()!;
+  //   const encPass = await encryptWithBase64Key(key, password.password);
+  //   const encNotes =
+  //     password.notes !== undefined
+  //       ? await encryptWithBase64Key(key, password.notes)
+  //       : undefined;
 
-    return {
-      ...password,
-      password: encPass,
-      notes: encNotes,
-    };
-  }
+  //   return {
+  //     ...password,
+  //     password: encPass,
+  //     notes: encNotes,
+  //   };
+  // }
 
-  private async encryptPasswords(data: IPasswordCsvItem[]) {
+  private async encryptPasswords(
+    data: IPasswordCsvItem[]
+  ): Promise<EncryptedPasswordBody[]> {
     const key = this.keyService.getDekKey()!;
-    const encryptedPasswords = data.map((d) => this.encryptPassword(d));
-    return await Promise.all(encryptedPasswords);
+
+    // Create a new worker instance
+    const worker = new Worker(
+      new URL('./encrypt-password.worker', import.meta.url)
+    );
+
+    return new Promise((resolve, reject) => {
+      // Set up message handler
+      worker.onmessage = ({ data }) => {
+        worker.terminate();
+        console.log(data);
+        resolve(data as EncryptedPasswordBody[]);
+      };
+
+      // Set up error handler
+      worker.onerror = (error) => {
+        worker.terminate();
+        reject(new Error(`Worker error: ${error.message}`));
+      };
+
+      // Send data to worker
+      worker.postMessage({
+        key: key,
+        passwords: data,
+      });
+    });
   }
 
   public async processFile(file: File) {
     const passwords = await this.uploadFile(file);
     const encryptedPasswords = await this.encryptPasswords(passwords);
+    const payloadSizeBytes = new Blob([JSON.stringify(encryptedPasswords)])
+      .size;
+    const payloadSizeKB = payloadSizeBytes / 1024;
+    const payloadSizeMB = payloadSizeKB / 1024;
+
+    console.log(
+      `Payload size: ${payloadSizeBytes} bytes | ${payloadSizeKB.toFixed(
+        2
+      )} KB | ${payloadSizeMB.toFixed(2)} MB`
+    );
     this.sendPasswordApi(encryptedPasswords).subscribe((value) => {
       this.success.next({
         success: true,

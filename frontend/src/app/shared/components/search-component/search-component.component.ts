@@ -59,6 +59,7 @@ export class SearchComponentComponent implements DoCheck {
   private filteredPasswords(): void {
     let filtered = [...this.data];
 
+    // Filter by selected value
     if (this.selectedFilteredValue !== 'all') {
       filtered = filtered.filter((item) => {
         const value = (item as any)[this.filterKey];
@@ -66,44 +67,30 @@ export class SearchComponentComponent implements DoCheck {
       });
     }
 
+    // Filter by search term (simple exact matching)
     if (this.searchTerm) {
       const term = this.searchTerm.toLowerCase();
-
-      const fuse = new Fuse(filtered, {
-        keys: ['website'],
-        threshold: 0.3,
-      });
-
-      const fuzzyResults = fuse.search(term).map((r) => r.item);
-      const exactResults = filtered.filter(
+      filtered = filtered.filter(
         (item) =>
+          item.website.toLowerCase().includes(term) ||
           item.userName.toLowerCase().includes(term) ||
           item.email.toLowerCase().includes(term)
       );
-
-      const combinedResults = [...fuzzyResults, ...exactResults];
-      const seen = new Set();
-
-      filtered = combinedResults.filter((item) => {
-        const key = item._id || item.email || JSON.stringify(item);
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      });
     }
 
+    // Type checking and sorting
     const isDeletedPassword = (item: any): item is DeletedPassword =>
       'daysLeft' in item;
     const isDecryptedPassword = (item: any): item is DecryptedPassword =>
       'toggle' in item || 'receiverMail' in item;
 
-    // Narrowing type of the array to DeletedPassword or DecryptedPassword
     if (filtered.every(isDeletedPassword)) {
       filtered.sort(this.sortFun as PasswordSortFn<DeletedPassword>);
     } else if (filtered.every(isDecryptedPassword)) {
       filtered.sort(this.sortFun as PasswordSortFn<DecryptedPassword>);
     }
 
+    // Emit results
     this.result.emit(filtered);
     this.sortChange.emit(this.sortOption);
   }

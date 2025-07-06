@@ -1,6 +1,7 @@
 import {
     addPasswordsController,
     allPasswordsController,
+    deleteAllPasswordsController,
     deletePasswordController,
     editPasswordController,
     getDeletedPasswords,
@@ -36,6 +37,12 @@ router.delete(
     '/password/premenantdelete/:passwordId',
     authHandler,
     permenantDeletePassword
+);
+
+router.delete(
+    '/password/deleteAll/:userId',
+    authHandler,
+    deleteAllPasswordsController
 );
 
 router.use('/shared', authHandler, shareRouter);

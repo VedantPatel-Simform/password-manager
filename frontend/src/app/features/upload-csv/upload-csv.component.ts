@@ -40,6 +40,7 @@ export class UploadCsvComponent implements OnInit {
     this.uploadService.success$.subscribe((value) => {
       if (value.message) {
         this.toast.showSuccess('Successful', value.message);
+        this.uploadService.setSuccess({});
         this.router.navigate(['dashboard']);
       }
     });

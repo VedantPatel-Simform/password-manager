@@ -15,6 +15,8 @@ export class GlobalErrorHandlerService implements ErrorHandler {
     if (error instanceof AppErrorHandler) {
       console.log(error);
       this.toast.showError(error.type, error.message);
+    } else if (error instanceof HttpErrorResponse) {
+      this.toast.showError('Http Error', error.message);
     }
   }
 }

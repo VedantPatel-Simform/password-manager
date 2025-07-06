@@ -124,4 +124,10 @@ export class PasswordService {
       '/user/password/premenantdelete/' + id
     );
   }
+
+  deleteAllPasswords(id: string) {
+    return this.http.delete<{ success: boolean; message: string }>(
+      '/user/password/deleteAll/' + id
+    );
+  }
 }
