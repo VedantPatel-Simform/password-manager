@@ -1,0 +1,81 @@
+@if (data().length > pageSize) {
+<div class="flex justify-center items-center gap-1 my-4">
+  <button
+    class="rounded-full p-2 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
+    [disabled]="currentPage() === 1"
+    (click)="prevPage()"
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      class="h-5 w-5"
+      viewBox="0 0 20 20"
+      fill="currentColor"
+    >
+      <path
+        fill-rule="evenodd"
+        d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+        clip-rule="evenodd"
+      />
+    </svg>
+  </button>
+
+  <!-- First page -->
+  @if (visiblePages()[0] > 1) {
+  <button
+    class="w-10 h-10 rounded-full transition-colors hover:bg-gray-100 text-gray-700"
+    (click)="goToPage(1)"
+  >
+    1
+  </button>
+  @if (visiblePages()[0] > 2) {
+  <span class="px-2">...</span>
+  } }
+
+  <!-- Visible pages -->
+  @for (page of visiblePages(); track page) {
+  <button
+    class="w-10 h-10 rounded-full transition-colors"
+    [class]="
+      page === currentPage()
+        ? 'bg-blue-500 text-white'
+        : 'hover:bg-gray-100 text-gray-700'
+    "
+    (click)="goToPage(page)"
+  >
+    {{ page }}
+  </button>
+  }
+
+  <!-- Last page -->
+  @if (visiblePages()[visiblePages().length - 1] < totalPages()) { @if
+  (visiblePages()[visiblePages().length - 1] < totalPages() - 1) {
+  <span class="px-2">...</span>
+  }
+  <button
+    class="w-10 h-10 rounded-full transition-colors hover:bg-gray-100 text-gray-700"
+    (click)="goToPage(totalPages())"
+  >
+    {{ totalPages() }}
+  </button>
+  }
+
+  <button
+    class="rounded-full p-2 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
+    [disabled]="currentPage() === totalPages()"
+    (click)="nextPage()"
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      class="h-5 w-5"
+      viewBox="0 0 20 20"
+      fill="currentColor"
+    >
+      <path
+        fill-rule="evenodd"
+        d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+        clip-rule="evenodd"
+      />
+    </svg>
+  </button>
+</div>
+}

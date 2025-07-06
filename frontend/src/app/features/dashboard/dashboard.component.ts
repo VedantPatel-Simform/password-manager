@@ -18,6 +18,7 @@ import { ToastComponent } from '../../shared/components/toast/toast.component';
 import { DrawerModule } from 'primeng/drawer'; // Import Drawer module
 import { UserDetailsService } from '../../core/services/User/user-details.service';
 import { TitleCasePipe } from '@angular/common';
+import { PaginatorComponent } from '../../shared/components/paginator/paginator.component';
 @Component({
   selector: 'app-dashboard',
   imports: [
@@ -29,6 +30,7 @@ import { TitleCasePipe } from '@angular/common';
     ToastComponent,
     DrawerModule, // Add Drawer module here
     TitleCasePipe,
+    PaginatorComponent,
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css'],
