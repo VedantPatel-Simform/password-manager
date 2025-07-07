@@ -1,6 +1,7 @@
 import {
   Component,
   OnDestroy,
+  ViewChild,
   computed,
   effect,
   inject,
@@ -16,7 +17,7 @@ import { InputText } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
-
+import { Table, TableModule } from 'primeng/table';
 // RxJS
 import { forkJoin, from, of, Subscription, switchMap } from 'rxjs';
 
@@ -59,6 +60,7 @@ import { PaginatorComponent } from '../../shared/components/paginator/paginator.
     NgClass,
     SearchComponentComponent,
     PaginatorComponent,
+    TableModule,
   ],
   templateUrl: './password-dashboard.component.html',
   styleUrls: ['./password-dashboard.component.css'],
@@ -68,6 +70,35 @@ export class PasswordDashboardComponent implements OnDestroy {
   selectedCategory = 'all';
   sortOption = 'created_desc';
   loading = true;
+  cols: {
+    field: keyof DecryptedPassword;
+    header: keyof DecryptedPassword;
+  }[] = [
+    {
+      field: 'website',
+      header: 'website',
+    },
+    {
+      field: 'userName',
+      header: 'userName',
+    },
+    {
+      field: 'email',
+      header: 'email',
+    },
+    {
+      field: 'password',
+      header: 'password',
+    },
+    {
+      field: 'category',
+      header: 'category',
+    },
+    {
+      field: 'notes',
+      header: 'notes',
+    },
+  ];
 
   categoryOptions = categoryOptions;
   sortOptions = sortOptions;
@@ -75,9 +106,7 @@ export class PasswordDashboardComponent implements OnDestroy {
 
   passwords: IPassword[] = [];
   decryptedPasswords: (IDecryptedPassword & { toggle: boolean })[] = [];
-  filteredPasswordList = signal<(IDecryptedPassword & { toggle: boolean })[]>(
-    []
-  );
+  filteredPasswordList: (IDecryptedPassword & { toggle: boolean })[] = [];
   displayList = signal<(IDecryptedPassword & { toggle: boolean })[]>([]);
 
   // Subscriptions
@@ -89,7 +118,7 @@ export class PasswordDashboardComponent implements OnDestroy {
   private keyService = inject(KeyStorageService);
   private toastService = inject(ToastService);
   private router = inject(Router);
-
+  @ViewChild('tb') tableEl: Table | null = null;
   constructor() {
     this.loadPasswords();
 
@@ -132,9 +161,8 @@ export class PasswordDashboardComponent implements OnDestroy {
       .subscribe({
         next: (decryptedPasswords) => {
           this.decryptedPasswords = decryptedPasswords;
-          this.filteredPasswordList.set([...decryptedPasswords]);
-          console.log(this.filteredPasswordList());
-          this.displayList.set(this.filteredPasswordList().slice(0, 5)); // Initial page
+          this.filteredPasswordList = [...decryptedPasswords];
+          console.log(this.filteredPasswordList);
         },
         error: (err) => {
           this.toastService.showError('Decryption Error', err.message);
@@ -187,7 +215,14 @@ export class PasswordDashboardComponent implements OnDestroy {
 
   setFilteredData(list: (IDecryptedPassword & { toggle: boolean })[]) {
     console.log('changing filtered password data....');
-    this.filteredPasswordList.set(list);
+    this.filteredPasswordList = list;
+  }
+
+  toast() {
+    this.toastService.showSuccess(
+      'Success',
+      'Data successfully exported to CSV'
+    );
   }
 
   onSortChange(option: string): void {
@@ -204,6 +239,13 @@ export class PasswordDashboardComponent implements OnDestroy {
       case 'updated_desc':
         this.sortFn = sortByUpdatedDesc;
         break;
+    }
+  }
+
+  exportToCsv() {
+    if (this.tableEl) {
+      this.tableEl.exportCSV();
+      this.toastService.showSuccess('Success', 'Exported to csv');
     }
   }
 

@@ -10,7 +10,7 @@ import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ConfirmDialog } from 'primeng/confirmdialog';
-
+import { TableModule } from 'primeng/table';
 // RxJS
 import { forkJoin, from, of, Subscription, switchMap } from 'rxjs';
 
@@ -50,6 +50,7 @@ export type DeletedPassword = IDecryptedPassword & { daysLeft: number };
     Dialog,
     SearchComponentComponent,
     InputTextModule,
+    TableModule,
   ],
   standalone: true,
   templateUrl: './recycle-bin.component.html',

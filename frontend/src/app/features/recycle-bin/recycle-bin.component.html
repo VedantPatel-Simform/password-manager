@@ -1,21 +1,23 @@
 <div class="p-2 space-y-6">
   <!-- heading -->
   <div
-    class="flex items-center border-l-8 border-blue-600 bg-white p-4 rounded-xl shadow-lg space-x-4"
+    class="flex items-center justify-between border-l-8 border-blue-600 bg-white p-4 rounded-xl shadow-lg"
   >
-    <div>
-      <h2 class="text-3xl font-bold text-blue-800">Recycle Bin</h2>
-      <p class="text-sm text-gray-500">
-        Restore or permanently delete old records
-      </p>
+    <div class="flex items-center space-x-4">
+      <div>
+        <h2 class="text-3xl font-bold text-blue-800">Recycle Bin</h2>
+        <p class="text-sm text-gray-500">
+          Restore or permanently delete old records
+        </p>
+      </div>
     </div>
-    <!-- Add Delete All button here -->
+
+    <!-- Delete All button -->
     <button
       pButton
       label="Delete All"
       (click)="deleteDialogVisible2 = true"
       severity="danger"
-      class="ml-auto"
       [disabled]="deletedPasswords.length == 0"
     ></button>
   </div>
@@ -31,99 +33,139 @@
     (sortChange)="onSortChange($event)"
   ></app-search-component>
 
-  <!-- Additional CSS -->
   <style>
-    /* Extra polish for dropdowns */
     ::ng-deep .custom-dropdown .p-dropdown-label {
       padding: 0.75rem 1rem;
     }
-
     ::ng-deep .custom-dropdown .p-dropdown {
       border-radius: 0.75rem;
     }
+    ::ng-deep .p-paginator {
+      background: transparent;
+      border: none;
+      margin-top: 1rem;
+    }
+    ::ng-deep .p-paginator .p-paginator-pages .p-paginator-page.p-highlight {
+      background: #2563eb;
+      border-color: #2563eb;
+      color: #fff;
+    }
+    ::ng-deep
+      .p-paginator
+      .p-paginator-pages
+      .p-paginator-page:not(.p-highlight):hover {
+      background: #dbeafe;
+    }
+    ::ng-deep .p-table .p-datatable-header {
+      background: transparent;
+      border: none;
+      padding: 0;
+    }
+    ::ng-deep .p-datatable .p-datatable-tbody > tr {
+      background: white;
+      margin-bottom: 1rem;
+      border-radius: 1rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+        0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    ::ng-deep .p-datatable .p-datatable-tbody > tr > td {
+      border: none;
+      padding: 1.5rem;
+    }
   </style>
 
-  <!-- Password List -->
+  <!-- Password Table -->
   <div class="space-y-6 mt-6">
-    <!-- Display passwords if available -->
     @if (loading) {
     <div class="loader"></div>
-    } @else if(filteredPasswords.length > 0){
-    <div>
-      @for (password of filteredPasswords; track password._id) {
-      <div
-        class="mb-6 flex flex-col md:flex-row items-center justify-between p-6 bg-white shadow-lg rounded-2xl hover:shadow-xl transition-shadow duration-300 ease-in-out"
-      >
-        <!-- Left: Logo + Website & Username -->
-        <div class="flex items-center space-x-4 w-full md:w-1/4">
-          <!-- Display the website logo as an image -->
-          <img
-            [src]="
-              'https://img.logo.dev/' +
-              getDomainFromUrl(password.website).pathname
-            "
-            alt="{{ password.website }} logo"
-            class="w-10 h-10 rounded-md"
-          />
-
-          <div>
-            <div class="font-semibold text-blue-800 text-lg">
-              {{ getDomainFromUrl(password.website).hostname }}
+    } @else if(filteredPasswords.length > 0) {
+    <p-table
+      [value]="filteredPasswords"
+      [paginator]="true"
+      [rows]="5"
+      [rowsPerPageOptions]="[5, 10, 20]"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+      styleClass="p-datatable-striped p-datatable-gridlines"
+      [tableStyle]="{ 'min-width': '100%' }"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="width: 25%">Website & Username</th>
+          <th style="width: 25%">Email</th>
+          <th style="width: 25%">Days Remaining</th>
+          <th style="width: 25%">Actions</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-password>
+        <tr class="hover:shadow-xl transition-shadow duration-300 ease-in-out">
+          <!-- Website + Username -->
+          <td>
+            <div class="flex items-center space-x-4">
+              <img
+                [src]="
+                  'https://img.logo.dev/' +
+                  getDomainFromUrl(password.website).pathname
+                "
+                alt="{{ password.website }} logo"
+                class="w-10 h-10 rounded-md"
+              />
+              <div>
+                <div class="font-semibold text-blue-800 text-lg">
+                  {{ getDomainFromUrl(password.website).hostname }}
+                </div>
+                <div class="text-sm text-gray-500">{{ password.userName }}</div>
+              </div>
             </div>
-            <div class="text-sm text-gray-500">{{ password.userName }}</div>
-          </div>
-        </div>
+          </td>
 
-        <!-- Middle: Email ID (Hidden on small screens) -->
-        <div
-          class="flex items-center justify-center space-x-3 w-full md:w-1/4 justify-center mt-3 md:mt-0 md:block hidden"
-        >
-          <div
-            class="flex items-center space-x-2 text-gray-600 font-bold text-base"
-          >
-            <span>{{ password.email }}</span>
-          </div>
-        </div>
+          <!-- Email -->
+          <td>
+            <div
+              class="flex items-center space-x-2 text-gray-600 font-bold text-base"
+            >
+              <span>{{ password.email }}</span>
+            </div>
+          </td>
 
-        <!-- Right: Days Remaining Badge with PrimeIcons -->
-        <div
-          class="w-full md:w-1/4 mt-3 md:mt-0 hidden md:flex items-center justify-center"
-        >
-          <div
-            class="flex items-center gap-2 px-3 py-1 text-sm font-semibold rounded-2xl shadow-sm border text-center"
-            [ngClass]="{
-              'bg-green-100 text-green-700 border-green-300':
-                password.daysLeft > 14,
-              'bg-yellow-100 text-yellow-800 border-yellow-300':
-                password.daysLeft <= 14 && password.daysLeft > 3,
-              'bg-red-100 text-red-700 border-red-300': password.daysLeft <= 3
-            }"
-          >
-            <i class="pi pi-clock text-sm"></i>
-            {{ password.daysLeft }} days left
-          </div>
-        </div>
+          <!-- Days Remaining -->
+          <td>
+            <div
+              class="flex items-center gap-2 px-3 py-1 text-sm font-semibold rounded-2xl shadow-sm border text-center"
+              [ngClass]="{
+                'bg-green-100 text-green-700 border-green-300':
+                  password.daysLeft > 14,
+                'bg-yellow-100 text-yellow-800 border-yellow-300':
+                  password.daysLeft <= 14 && password.daysLeft > 3,
+                'bg-red-100 text-red-700 border-red-300': password.daysLeft <= 3
+              }"
+            >
+              <i class="pi pi-clock text-sm"></i>
+              {{ password.daysLeft }} days left
+            </div>
+          </td>
 
-        <div
-          class="flex items-center justify-end w-full md:w-1/4 mt-3 md:mt-0 space-x-3"
-        >
-          <button
-            pButton
-            label="Delete"
-            (click)="openDeleteDialog(password._id)"
-            severity="danger"
-            class="flex-1 p-button-primary p-2 rounded-md shadow-sm hover:shadow-md transition-all duration-200 bg-red-500 text-white"
-          ></button>
-          <button
-            pButton
-            label="Restore"
-            (click)="restorePassword(password)"
-            class="flex-1 p-button-primary p-2 rounded-md shadow-sm hover:shadow-md transition-all duration-200 bg-blue-500 text-white"
-          ></button>
-        </div>
-      </div>
-      }
-    </div>
+          <!-- Actions -->
+          <td>
+            <div class="flex items-center justify-end space-x-3">
+              <button
+                pButton
+                label="Delete"
+                (click)="openDeleteDialog(password._id)"
+                severity="danger"
+                class="p-button-danger p-2 rounded-md shadow-sm hover:shadow-md transition-all duration-200"
+              ></button>
+              <button
+                pButton
+                label="Restore"
+                (click)="restorePassword(password)"
+                class="p-button-primary p-2 rounded-md shadow-sm hover:shadow-md transition-all duration-200"
+              ></button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
     } @else {
     <div
       class="flex flex-col items-center justify-center text-center py-20 text-gray-500"

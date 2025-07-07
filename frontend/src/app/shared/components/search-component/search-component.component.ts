@@ -1,17 +1,9 @@
 import { IDecryptedPassword } from './../../interfaces/password.interface';
-import {
-  Component,
-  DoCheck,
-  EventEmitter,
-  Input,
-  OnChanges,
-  Output,
-  SimpleChanges,
-} from '@angular/core';
+import { Component, DoCheck, EventEmitter, Input, Output } from '@angular/core';
 
 // Angular Modules
 import { CommonModule } from '@angular/common';
-import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 
 // PrimeNG Modules
 import { DropdownModule } from 'primeng/dropdown';
@@ -24,7 +16,6 @@ import Fuse from 'fuse.js';
 import { PasswordSortFn, DecryptedPassword } from '../../../utils/sortFn.utils';
 import { DeletedPassword } from '../../../features/recycle-bin/recycle-bin.component';
 import { IDecryptedPasswordShare } from '../../interfaces/PasswordShare.interface';
-import { debounce, debounceTime, distinctUntilChanged } from 'rxjs';
 
 type InputData =
   | (IDecryptedPassword & { toggle: boolean })[]
@@ -41,13 +32,12 @@ type InputData =
     InputText,
     InputGroupModule,
     InputGroupAddonModule,
-    ReactiveFormsModule,
   ],
   templateUrl: './search-component.component.html',
   styleUrls: ['./search-component.component.css'],
 })
-export class SearchComponentComponent implements OnChanges {
-  searchTerm = new FormControl('');
+export class SearchComponentComponent implements DoCheck {
+  searchTerm: string = '';
   selectedFilteredValue: string = 'all';
 
   @Input() categoryOptions: { value: string; label: string }[] = [];
@@ -62,22 +52,11 @@ export class SearchComponentComponent implements OnChanges {
   @Output() result = new EventEmitter<any[]>();
   @Output() sortChange = new EventEmitter<any>();
 
-  constructor() {
-    this.searchTerm.valueChanges
-      .pipe(debounceTime(300), distinctUntilChanged())
-      .subscribe((value) => {
-        if (value) {
-          console.log('value = ', value, ' emitted');
-          this.filteredPasswords(value);
-        }
-      });
+  ngDoCheck(): void {
+    this.filteredPasswords();
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    this.filteredPasswords(this.searchTerm.value!);
-  }
-
-  private filteredPasswords(searchTerm: string): void {
+  private filteredPasswords(): void {
     let filtered = [...this.data];
 
     // Filter by selected value
@@ -89,8 +68,8 @@ export class SearchComponentComponent implements OnChanges {
     }
 
     // Filter by search term (simple exact matching)
-    if (searchTerm.length !== 0) {
-      const term = searchTerm.toLowerCase();
+    if (this.searchTerm) {
+      const term = this.searchTerm.toLowerCase();
       filtered = filtered.filter(
         (item) =>
           item.website.toLowerCase().includes(term) ||
@@ -111,6 +90,7 @@ export class SearchComponentComponent implements OnChanges {
       filtered.sort(this.sortFun as PasswordSortFn<DecryptedPassword>);
     }
 
+    // Emit results
     this.result.emit(filtered);
     this.sortChange.emit(this.sortOption);
   }
