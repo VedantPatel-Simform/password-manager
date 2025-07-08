@@ -14,6 +14,17 @@ import { encryptWithBase64Key } from '../../utils/crypto.utils';
 import { KeyStorageService } from '../../core/services/User/key-storage.service';
 import { HttpClient } from '@angular/common/http';
 import { AppErrorHandler } from '../../shared/classes/AppError.handler';
+import { ToastService } from '../../core/services/toast/toast.service';
+import { Router } from '@angular/router';
+
+interface ValidationError {
+  row: number; // 1-based index of the row in the CSV
+  message: string; // Main error message (e.g., "Missing required field")
+  field?: string; // Optional: which field caused the error
+  value?: any; // Optional: the invalid value that caused the error
+  expected?: string; // Optional: what was expected (e.g., "non-empty string")
+  details?: string; // Optional: additional details about the error
+}
 
 @Injectable({
   providedIn: 'root',
@@ -21,16 +32,9 @@ import { AppErrorHandler } from '../../shared/classes/AppError.handler';
 export class UploadCsvService {
   private keyService = inject(KeyStorageService);
   private http = inject(HttpClient);
+  private toastService = inject(ToastService);
+  private router = inject(Router);
 
-  private success = new BehaviorSubject<{
-    success?: boolean;
-    message?: string;
-  }>({});
-  success$ = this.success.asObservable();
-
-  setSuccess(data: { success?: boolean; message?: string }) {
-    this.success.next(data);
-  }
   private readonly validCategories: CategoryValue[] = [
     'social_media',
     'work_professional',
@@ -105,23 +109,6 @@ export class UploadCsvService {
     });
   }
 
-  // private async encryptPassword(
-  //   password: IPasswordCsvItem
-  // ): Promise<EncryptedPasswordBody> {
-  //   const key = this.keyService.getDekKey()!;
-  //   const encPass = await encryptWithBase64Key(key, password.password);
-  //   const encNotes =
-  //     password.notes !== undefined
-  //       ? await encryptWithBase64Key(key, password.notes)
-  //       : undefined;
-
-  //   return {
-  //     ...password,
-  //     password: encPass,
-  //     notes: encNotes,
-  //   };
-  // }
-
   private async encryptPasswords(
     data: IPasswordCsvItem[]
   ): Promise<EncryptedPasswordBody[]> {
@@ -168,10 +155,8 @@ export class UploadCsvService {
       )} KB | ${payloadSizeMB.toFixed(2)} MB`
     );
     this.sendPasswordApi(encryptedPasswords).subscribe((value) => {
-      this.success.next({
-        success: true,
-        message: value.message,
-      });
+      this.toastService.showSuccess('Success', 'Password upload success');
+      this.router.navigate(['dashboard']);
     });
   }
 
@@ -215,7 +200,7 @@ export class UploadCsvService {
     if (!this.websiteRegex.test(item.website)) {
       throw new AppErrorHandler(
         'Validation Error',
-        `Row ${index + 1}: invalid website format`
+        `Row ${index + 1}: invalid website format , ${item.website} is invalid`
       );
     }
 
@@ -237,7 +222,7 @@ export class UploadCsvService {
     if (!this.emailRegex.test(item.email)) {
       throw new AppErrorHandler(
         'Validation Error',
-        `Row ${index + 1}: invalid email format`
+        `Row ${index + 1}: invalid email format, ${item.email} is invalid`
       );
     }
 
@@ -290,22 +275,35 @@ export class UploadCsvService {
       throw new AppErrorHandler('File Empty', 'CSV file is empty');
     }
 
-    const allKeysValid = csvData.every((data) => {
-      const dataKeys = Object.keys(data);
-      const ans =
-        this.requiredFields.every((key) => dataKeys.includes(key)) && // all required fields present
-        dataKeys.every((key) => this.requiredFields.includes(key)); // no extra fields
-      console.log(ans, '->', data);
-      return ans;
-    });
+    const errors: ValidationError[] = [];
 
-    if (!allKeysValid) {
-      throw new AppErrorHandler('File format error', "Some column's missing");
+    // First pass: validate all rows and collect errors
+    const validatedData = csvData
+      .map((row, index) => {
+        try {
+          const normalizedRow = this.normalizeRowKeys(row);
+          return this.validatePasswordItem(normalizedRow, index);
+        } catch (error: any) {
+          errors.push({
+            row: index + 1, // 1-based index for user display
+            message: error.message || 'Validation error',
+            details: error.details,
+          });
+          return null;
+        }
+      })
+      .filter((item) => item !== null) as IPasswordCsvItem[];
+
+    if (errors.length > 0) {
+      const error = new AppErrorHandler(
+        'Validation Errors',
+        `Found ${errors.length} validation errors in the CSV file`
+      );
+      (error as any).errors = errors; // Attach detailed errors
+      throw error;
     }
-    return csvData.map((row, index) => {
-      const normalizedRow = this.normalizeRowKeys(row);
-      return this.validatePasswordItem(normalizedRow, index);
-    });
+
+    return validatedData;
   }
 
   private inferCategory(category: string): CategoryValue {

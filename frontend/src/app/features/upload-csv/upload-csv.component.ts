@@ -17,32 +17,39 @@ import {
 import { CommonModule } from '@angular/common';
 import { FileSizePipe } from './filesize.pipe';
 import { Router } from '@angular/router';
+import { AccordionModule } from 'primeng/accordion';
+import { Dialog } from 'primeng/dialog';
+
+interface ValidationError {
+  row: number;
+  message: string;
+  details?: string;
+}
 
 @Component({
   selector: 'app-upload-csv',
-  imports: [ButtonModule, ReactiveFormsModule, CommonModule, FileSizePipe],
+  imports: [
+    ButtonModule,
+    ReactiveFormsModule,
+    CommonModule,
+    FileSizePipe,
+    AccordionModule,
+    Dialog,
+  ],
   templateUrl: './upload-csv.component.html',
   styleUrl: './upload-csv.component.css',
 })
-export class UploadCsvComponent implements OnInit {
+export class UploadCsvComponent {
   uploadForm: FormGroup;
   selectedFile: File | null = null;
+  validationErrors: ValidationError[] = [];
   uploadService = inject(UploadCsvService);
   router = inject(Router);
   toast = inject(ToastService);
+  displayValidationErrors = false;
   constructor(private fb: FormBuilder) {
     this.uploadForm = this.fb.group({
       csvFile: [null, Validators.required],
-    });
-  }
-
-  ngOnInit(): void {
-    this.uploadService.success$.subscribe((value) => {
-      if (value.message) {
-        this.toast.showSuccess('Successful', value.message);
-        this.uploadService.setSuccess({});
-        this.router.navigate(['dashboard']);
-      }
     });
   }
 
@@ -53,19 +60,38 @@ export class UploadCsvComponent implements OnInit {
       this.uploadForm.patchValue({
         csvFile: this.selectedFile,
       });
+      this.validationErrors = []; // Clear previous errors when new file is selected
     }
   }
 
-  onSubmit() {
+  async onSubmit() {
     if (this.uploadForm.valid && this.selectedFile) {
       try {
-        this.uploadService.processFile(this.selectedFile);
+        this.validationErrors = []; // Reset errors before processing
+        await this.uploadService.processFile(this.selectedFile);
       } catch (err: any) {
-        this.toast.showError('Error', err.message);
+        if (err.errors) {
+          // Handle structured validation errors
+          this.validationErrors = err.errors.map((error: any) => ({
+            row: error.row || 0,
+            message: error.message || 'Validation error',
+            details: error.details,
+          }));
+          this.displayValidationErrors = true;
+        } else {
+          // Handle other errors
+          this.toast.showError('Error', err.message);
+        }
       }
-    } else {
-      alert('error');
     }
+  }
+  showValidationErrors() {
+    this.displayValidationErrors = true;
+  }
+  getUniqueRowCount(): number {
+    if (!this.validationErrors?.length) return 0;
+    const uniqueRows = new Set(this.validationErrors.map((e) => e.row));
+    return uniqueRows.size;
   }
 
   downloadSampleCSV() {
