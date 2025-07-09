@@ -11,28 +11,54 @@ type PasswordBody = Omit<
     'deleted' | 'deletedTimeStamp' | 'autoDeleteDate' | 'userId'
 >;
 
-export const addPasswordController = expressAsyncHandler(
-    async (req: Request<unknown, unknown, PasswordBody>, res: Response) => {
-        const { website, userName, password, notes, email, category } =
-            req.body;
+export const addPasswordsController = expressAsyncHandler(
+    async (req: Request<unknown, unknown, PasswordBody[]>, res: Response) => {
+        const passwords = req.body;
         const { id } = req.user;
+
+        // Validate input is an array
+        if (!Array.isArray(passwords)) {
+            throw new ApiError(
+                'Input should be an array of passwords',
+                HTTP_STATUS.BAD_REQUEST.code
+            );
+        }
+
         const user = await User.findById(id);
         if (!user) {
             throw new ApiError('User not found', HTTP_STATUS.BAD_REQUEST.code);
         }
-        const newPassword = await Password.create({
-            userId: user._id.toString(),
-            website,
-            userName,
-            password,
-            category,
-            notes,
-            email,
+
+        // Add userId to each password and validate required fields
+        const passwordsToCreate = passwords.map((password) => {
+            if (
+                !password.website ||
+                !password.userName ||
+                !password.password ||
+                !password.email
+            ) {
+                throw new ApiError(
+                    'All passwords must contain website, userName, password, and email',
+                    HTTP_STATUS.BAD_REQUEST.code
+                );
+            }
+
+            return {
+                userId: user._id.toString(),
+                website: password.website,
+                userName: password.userName,
+                password: password.password,
+                category: password.category,
+                notes: password.notes,
+                email: password.email.toLowerCase(),
+            };
         });
+
+        const createdPasswords = await Password.insertMany(passwordsToCreate);
 
         res.status(HTTP_STATUS.CREATED.code).json({
             success: true,
-            password: newPassword,
+            message: `${createdPasswords.length} passwords added successfully`,
         });
     }
 );
@@ -215,6 +241,23 @@ export const permenantDeletePassword = expressAsyncHandler(
         res.status(200).json({
             success: true,
             message: 'Password permenantly deleted',
+        });
+    }
+);
+
+export const deleteAllPasswordsController = expressAsyncHandler(
+    async (req: Request<{ userId: string }>, res: Response) => {
+        const { userId } = req.params;
+
+        const result = await Password.deleteMany({
+            userId: userId,
+            // remove the below comment after testing
+            // deleted: true,
+        });
+
+        res.status(200).json({
+            success: true,
+            message: `Successfully deleted ${result.deletedCount} passwords`,
         });
     }
 );

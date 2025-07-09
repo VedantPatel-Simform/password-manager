@@ -1,6 +1,7 @@
 import {
-    addPasswordController,
+    addPasswordsController,
     allPasswordsController,
+    deleteAllPasswordsController,
     deletePasswordController,
     editPasswordController,
     getDeletedPasswords,
@@ -13,7 +14,7 @@ import { authHandler } from '../middlewares/authentication.middleware.js';
 import shareRouter from './passwordShare.routes.js';
 const router = Router();
 
-router.post('/password/add', authHandler, addPasswordController);
+router.post('/password/add', authHandler, addPasswordsController);
 router.delete(
     '/password/delete/:passwordId',
     authHandler,
@@ -36,6 +37,12 @@ router.delete(
     '/password/premenantdelete/:passwordId',
     authHandler,
     permenantDeletePassword
+);
+
+router.delete(
+    '/password/deleteAll/:userId',
+    authHandler,
+    deleteAllPasswordsController
 );
 
 router.use('/shared', authHandler, shareRouter);

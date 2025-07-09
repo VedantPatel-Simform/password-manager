@@ -79,7 +79,7 @@ export class PasswordService {
         };
         return this.http.post<{ success: boolean; password: IPassword }>(
           '/user/password/add/',
-          sendPassword
+          [sendPassword]
         );
       })
     );
@@ -122,6 +122,12 @@ export class PasswordService {
   permenantDeletePassword(id: string) {
     return this.http.delete<{ success: boolean; message: string }>(
       '/user/password/premenantdelete/' + id
+    );
+  }
+
+  deleteAllPasswords(id: string) {
+    return this.http.delete<{ success: boolean; message: string }>(
+      '/user/password/deleteAll/' + id
     );
   }
 }

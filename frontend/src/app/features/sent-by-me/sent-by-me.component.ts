@@ -1,5 +1,5 @@
 import { sortOptions } from './../../core/constants/sort.options';
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, ViewChild } from '@angular/core';
 import {
   IDecryptedPasswordShare,
   IPasswordShare,
@@ -8,6 +8,9 @@ import { PasswordSentService } from '../../core/services/password/password-sent.
 import { SearchComponentComponent } from '../../shared/components/search-component/search-component.component';
 import { ToastService } from '../../core/services/toast/toast.service';
 import { KeyStorageService } from '../../core/services/User/key-storage.service';
+import { Table, TableModule } from 'primeng/table';
+import { ButtonModule } from 'primeng/button';
+
 import {
   decryptWithBase64Key,
   decryptWithPrivateKey,
@@ -26,7 +29,7 @@ import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-sent-by-me',
-  imports: [SearchComponentComponent],
+  imports: [SearchComponentComponent, TableModule, ButtonModule],
   templateUrl: './sent-by-me.component.html',
   styleUrl: './sent-by-me.component.css',
 })
@@ -44,7 +47,7 @@ export class SentByMeComponent implements OnInit {
   sortOption = 'created_desc';
   sortOptions = sortOptions;
   sortFn: PasswordSortFn<DecryptedPassword> = sortByDateDesc;
-
+  @ViewChild('tb') tableEl: Table | null = null;
   router = inject(Router);
 
   categoryOptionList = signal<{ label: string; value: string }[]>([]);
@@ -156,6 +159,12 @@ export class SentByMeComponent implements OnInit {
       navigator.clipboard.writeText(field);
       this.toastService.showSuccess('Copied', 'Password Copied to clipboard');
       return;
+    }
+  }
+  exportToCsv() {
+    if (this.tableEl) {
+      this.tableEl.exportCSV();
+      this.toastService.showSuccess('Success', 'Exported to csv');
     }
   }
 

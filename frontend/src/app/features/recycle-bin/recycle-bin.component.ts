@@ -4,13 +4,13 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 // PrimeNG Modules
 import { DropdownModule } from 'primeng/dropdown';
-import { InputText } from 'primeng/inputtext';
+import { InputText, InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ConfirmDialog } from 'primeng/confirmdialog';
-
+import { TableModule } from 'primeng/table';
 // RxJS
 import { forkJoin, from, of, Subscription, switchMap } from 'rxjs';
 
@@ -49,6 +49,8 @@ export type DeletedPassword = IDecryptedPassword & { daysLeft: number };
     NgClass,
     Dialog,
     SearchComponentComponent,
+    InputTextModule,
+    TableModule,
   ],
   standalone: true,
   templateUrl: './recycle-bin.component.html',
@@ -62,13 +64,20 @@ export class RecycleBinComponent implements OnInit, OnDestroy {
   router = inject(Router);
   toastService = inject(ToastService);
   passwordListSub!: Subscription;
-
+  deleteDialogVisible2 = false;
   filteredPasswords: DeletedPassword[] = [];
 
   searchTerm!: string;
   selectedCategory!: string;
   sortOption!: string;
   sortFn: PasswordSortFn<DeletedPassword> = sortByDaysAsc;
+
+  isDeleteConfirmed = false;
+  deleteConfirmationText = '';
+  onConfirmationInput() {
+    this.isDeleteConfirmed =
+      this.deleteConfirmationText.toLowerCase() === 'confirm';
+  }
 
   sortOptions = [
     { label: 'Sort by Days Left (Ascending)', value: 'asc' },
@@ -193,6 +202,21 @@ export class RecycleBinComponent implements OnInit, OnDestroy {
       this.toastService.showSuccess('Permenantly Deleted', result.message);
       this.deletedPasswords = this.deletedPasswords.filter((p) => p._id !== id);
     });
+  }
+
+  cancelDelete2() {
+    this.passwordIdToDelete = null;
+    this.deleteDialogVisible2 = false;
+  }
+
+  confirmDelete2() {
+    this.passwordService
+      .deleteAllPasswords(this.deletedPasswords[0].userId)
+      .subscribe((res) => {
+        this.toastService.showSuccess('Success', res.message);
+        this.deletedPasswords = [];
+        this.deleteDialogVisible2 = false;
+      });
   }
 
   getDaysRemaining(autoDeleteDate?: Date): number {

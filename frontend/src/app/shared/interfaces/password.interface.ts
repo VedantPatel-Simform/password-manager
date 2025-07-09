@@ -41,6 +41,15 @@ export interface PasswordBody {
   notes?: string;
 }
 
+export interface EncryptedPasswordBody {
+  website: string;
+  userName: string;
+  email: string;
+  password: IEncryptedField;
+  category: CategoryValue;
+  notes?: IEncryptedField;
+}
+
 export type PasswordType = Pick<
   IPassword,
   'email' | 'website' | 'userName' | 'password' | 'category' | 'notes'
@@ -60,4 +69,33 @@ export interface IDecryptedPassword {
   deleted: boolean;
   deletedTimeStamp?: Date;
   autoDeleteDate?: Date;
+}
+
+export interface IPasswordCsvItem {
+  website: string;
+  userName: string;
+  email: string;
+  password: string;
+  category: CategoryValue;
+  notes?: string;
+}
+
+export interface IPasswordCsvRow {
+  [key: string]: string | undefined;
+  website?: string;
+  userName?: string;
+  email?: string;
+  password?: string;
+  category?: string;
+  notes?: string;
+}
+
+export interface INormalizedPasswordCsvRow {
+  [key: string]: string | undefined;
+  website: string;
+  userName: string;
+  email: string;
+  password: string;
+  category?: string;
+  notes?: string;
 }
