@@ -155,7 +155,7 @@ export class UploadCsvService {
       )} KB | ${payloadSizeMB.toFixed(2)} MB`
     );
     this.sendPasswordApi(encryptedPasswords).subscribe((value) => {
-      this.toastService.showSuccess('Success', 'Password upload success');
+      this.toastService.showSuccess('Success', value.message);
       this.router.navigate(['dashboard']);
     });
   }

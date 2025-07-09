@@ -91,17 +91,25 @@
     >
       <ng-template pTemplate="header">
         <tr>
-          <th style="width: 25%">Website & Username</th>
-          <th style="width: 10%">Email</th>
-          <th style="width: 30%">Days Remaining</th>
-          <th style="width: 0%">Actions</th>
+          <th class="text-right pr-6" style="width: 25%">
+            <div class="w-full flex justify-center">Website & Username</div>
+          </th>
+          <th class="text-left" style="width: 25%">
+            <div class="text-left w-full flex justify-center">Email</div>
+          </th>
+          <th class="text-right pr-6" style="width: 25%">
+            <div class="w-full flex justify-center">Days Left</div>
+          </th>
+          <th class="text-right pl-3" style="width: 25%">
+            <div class="w-full flex justify-center">Actions</div>
+          </th>
         </tr>
       </ng-template>
       <ng-template pTemplate="body" let-password>
         <tr class="hover:shadow-xl transition-shadow duration-300 ease-in-out">
           <!-- Website + Username -->
-          <td>
-            <div class="flex items-center space-x-4">
+          <td class="pl-6">
+            <div class="flex items-center space-x-4 w-full">
               <img
                 [src]="
                   'https://img.logo.dev/' +
@@ -110,11 +118,13 @@
                 alt="{{ password.website }} logo"
                 class="w-10 h-10 rounded-md"
               />
-              <div>
-                <div class="font-semibold text-blue-800 text-lg">
+              <div class="min-w-0">
+                <div class="font-semibold text-blue-800 text-lg truncate">
                   {{ getDomainFromUrl(password.website).hostname }}
                 </div>
-                <div class="text-sm text-gray-500">{{ password.userName }}</div>
+                <div class="text-sm text-gray-500 truncate">
+                  {{ password.userName }}
+                </div>
               </div>
             </div>
           </td>
@@ -122,44 +132,47 @@
           <!-- Email -->
           <td>
             <div
-              class="flex items-center space-x-2 text-gray-600 font-bold text-base"
+              class="flex items-center text-gray-600 font-bold text-base min-w-0"
             >
-              <span>{{ password.email }}</span>
+              <span class="truncate">{{ password.email }}</span>
             </div>
           </td>
 
           <!-- Days Remaining -->
           <td>
-            <div
-              class="flex items-center gap-2 px-3 py-1 text-sm font-semibold rounded-2xl shadow-sm border text-center"
-              [ngClass]="{
-                'bg-green-100 text-green-700 border-green-300':
-                  password.daysLeft > 14,
-                'bg-yellow-100 text-yellow-800 border-yellow-300':
-                  password.daysLeft <= 14 && password.daysLeft > 3,
-                'bg-red-100 text-red-700 border-red-300': password.daysLeft <= 3
-              }"
-            >
-              <i class="pi pi-clock text-sm"></i>
-              {{ password.daysLeft }} days left
+            <div class="flex justify-center">
+              <div
+                class="inline-flex items-center gap-2 px-3 py-1 text-sm font-semibold rounded-2xl shadow-sm border whitespace-nowrap"
+                [ngClass]="{
+                  'bg-green-100 text-green-700 border-green-300':
+                    password.daysLeft > 14,
+                  'bg-yellow-100 text-yellow-800 border-yellow-300':
+                    password.daysLeft <= 14 && password.daysLeft > 3,
+                  'bg-red-100 text-red-700 border-red-300':
+                    password.daysLeft <= 3
+                }"
+              >
+                <i class="pi pi-clock text-sm"></i>
+                {{ password.daysLeft }} days left
+              </div>
             </div>
           </td>
 
           <!-- Actions -->
-          <td>
-            <div class="flex items-center justify-end space-x-3">
+          <td class="pr-6">
+            <div class="w-full flex justify-end space-x-3">
               <button
                 pButton
                 label="Delete"
                 (click)="openDeleteDialog(password._id)"
                 severity="danger"
-                class="p-button-danger p-2 rounded-md shadow-sm hover:shadow-md transition-all duration-200"
+                class="p-button-danger p-2 rounded-md shadow-sm hover:shadow-md transition-all duration-200 whitespace-nowrap"
               ></button>
               <button
                 pButton
                 label="Restore"
                 (click)="restorePassword(password)"
-                class="p-button-primary p-2 rounded-md shadow-sm hover:shadow-md transition-all duration-200"
+                class="p-button-primary p-2 rounded-md shadow-sm hover:shadow-md transition-all duration-200 whitespace-nowrap"
               ></button>
             </div>
           </td>
