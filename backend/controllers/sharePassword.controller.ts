@@ -171,3 +171,17 @@ export const editPassword = expressAsyncHandler(
         });
     }
 );
+
+// received by me
+export const getReceivedByMePasswords = expressAsyncHandler(
+    async (req: Request, res: Response) => {
+        const { id } = req.user;
+        const SentByMePasswords = await SharedPasswords.find({
+            receiverId: id,
+        });
+        res.status(HTTP_STATUS.OK.code).json({
+            success: true,
+            passwords: SentByMePasswords,
+        });
+    }
+);
