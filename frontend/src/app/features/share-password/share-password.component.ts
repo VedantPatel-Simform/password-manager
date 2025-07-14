@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, inject, ViewChild } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -16,6 +16,7 @@ import { SharedPasswordBody } from '../../shared/interfaces/PasswordShare.interf
 import { DatePicker } from 'primeng/datepicker';
 import { PasswordSentService } from '../../core/services/password/password-sent.service';
 import { HttpErrorResponse } from '@angular/common/http';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-share-password',
@@ -51,6 +52,8 @@ export class SharePasswordComponent {
     { label: 'Travel & Tourism', value: 'travel_tourism' },
     { label: 'Other', value: 'other' },
   ];
+
+  router = inject(Router);
 
   minDate = new Date();
 
@@ -115,7 +118,7 @@ export class SharePasswordComponent {
     console.log(formData);
     this.sharePasswordService.sendPassword(formData).subscribe({
       next: (value) => {
-        console.log(value);
+        this.router.navigate(['/dashboard/shared/sent']);
         this.toastService.showSuccess('Successfully Shared', value.message);
       },
       error: (err: HttpErrorResponse) => {

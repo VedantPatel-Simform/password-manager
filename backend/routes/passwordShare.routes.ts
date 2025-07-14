@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authHandler } from '../middlewares/authentication.middleware.js';
+
 import {
     addSharedPassword,
     checkReceiverMail,
@@ -10,10 +10,10 @@ import {
 } from '../controllers/sharePassword.controller.js';
 const router = Router();
 
-router.get('/verifymail/:mail', authHandler, checkReceiverMail);
-router.post('/', authHandler, addSharedPassword);
-router.get('/', authHandler, getSentByMePasswords);
-router.get('/:passwordId', authHandler, getSharedPasswordDetails);
-router.delete('/:passwordId', authHandler, deletePassword);
-router.put('/', authHandler, editPassword);
+router.get('/verifymail/:mail', checkReceiverMail);
+router.post('/', addSharedPassword);
+router.get('/', getSentByMePasswords);
+router.get('/:passwordId', getSharedPasswordDetails);
+router.delete('/:passwordId', deletePassword);
+router.put('/', editPassword);
 export default router;

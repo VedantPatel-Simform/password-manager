@@ -12,6 +12,7 @@ import {
 import { Router } from 'express';
 import { authHandler } from '../middlewares/authentication.middleware.js';
 import shareRouter from './passwordShare.routes.js';
+import receiveRouter from './passwordReceive.routes.js';
 const router = Router();
 
 router.post('/password/add', authHandler, addPasswordsController);
@@ -46,5 +47,6 @@ router.delete(
 );
 
 router.use('/shared', authHandler, shareRouter);
+router.use('/received', authHandler, receiveRouter);
 
 export default router;

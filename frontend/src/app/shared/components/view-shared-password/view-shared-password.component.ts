@@ -27,7 +27,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModalComponent } from '../password-modal/password-modal.component';
 import { ToastService } from '../../../core/services/toast/toast.service';
 import { categoryOptions } from '../../../core/constants/category.options';
-import { NgClass } from '@angular/common';
+import { DatePipe, LocationStrategy, NgClass } from '@angular/common';
 import { PasswordSentService } from '../../../core/services/password/password-sent.service';
 import {
   IDecryptedPasswordShare,
@@ -55,6 +55,7 @@ import { ButtonModule } from 'primeng/button';
     NgClass,
     DatePicker,
     ButtonModule,
+    DatePipe,
   ],
 })
 export class ViewSharedPasswordComponent {
@@ -77,7 +78,7 @@ export class ViewSharedPasswordComponent {
 
   categoryOptions = categoryOptions.filter((val) => val.value !== 'all');
   minDate = new Date();
-
+  locationStrategy = inject(LocationStrategy);
   showGenerator = false;
   generatedPassword = '';
   passwordVisible = false;
@@ -85,12 +86,15 @@ export class ViewSharedPasswordComponent {
   visible = false;
   deleteDialogVisible = false;
   formChanged = false;
-
+  sender = true;
   @ViewChild('passwordModal') passwordModal!: PasswordModalComponent;
 
   ngOnInit() {
     this.passwordId = this.activatedRouter.snapshot.paramMap.get('id')!;
-
+    const state = this.locationStrategy.getState() as {
+      sender: boolean;
+    };
+    this.sender = state.sender;
     this.passwordService
       .getPasswordDetails(this.passwordId)
       .subscribe(async (res) => {
@@ -98,7 +102,9 @@ export class ViewSharedPasswordComponent {
 
         this.passwordPEK = await decryptWithPrivateKey(
           this.privateKey,
-          this.localPassword.senderPublicEncPEK
+          this.sender
+            ? this.localPassword.senderPublicEncPEK
+            : this.localPassword.receiverPublicEncPEK
         );
 
         const decryptedPassword = await decryptWithBase64Key(
@@ -150,12 +156,8 @@ export class ViewSharedPasswordComponent {
           ? new Date(this.localDecryptedPassword.expireDate)
           : null,
       ],
-      receiverMail: [
-        {
-          value: this.localDecryptedPassword.receiverMail,
-          disabled: true,
-        },
-      ],
+      receiverMail: [this.localDecryptedPassword.receiverMail],
+      senderMail: [this.localDecryptedPassword.senderMail],
     });
 
     this.initialFormValue = this.passwordForm.getRawValue();

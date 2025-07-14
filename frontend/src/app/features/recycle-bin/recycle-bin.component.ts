@@ -215,6 +215,7 @@ export class RecycleBinComponent implements OnInit, OnDestroy {
       .subscribe((res) => {
         this.toastService.showSuccess('Success', res.message);
         this.deletedPasswords = [];
+        this.passwordService.setPasswords([]);
         this.deleteDialogVisible2 = false;
       });
   }

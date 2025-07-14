@@ -1,1 +1,219 @@
-<p>recieved-by-me works!</p>
+<div class="p-2 space-y-6">
+  <!-- Heading -->
+  <div
+    class="flex items-center justify-between border-l-8 border-blue-600 bg-white p-4 rounded-xl shadow-lg"
+  >
+    <div class="flex items-center space-x-4">
+      <div>
+        <h2 class="text-3xl font-bold text-blue-800">Shared Passwords</h2>
+        <p class="text-sm text-gray-500">View passwords shared with you</p>
+      </div>
+    </div>
+
+    <!-- Export Button -->
+    <button
+      pButton
+      type="button"
+      icon="pi pi-file-excel"
+      label="Export to CSV"
+      (click)="exportToCsv()"
+      class="p-button-outlined p-button-secondary"
+      pTooltip="Export shared passwords to CSV"
+      tooltipPosition="left"
+    ></button>
+  </div>
+
+  <app-search-component
+    [categoryOptions]="categoryOptions"
+    [data]="receivedPasswords"
+    [filterKey]="'senderMail'"
+    [sortOptions]="sortOptions"
+    [sortOption]="sortOption"
+    [sortFun]="sortFn"
+    (result)="setFilteredList($event)"
+    (sortChange)="onSortChange($event)"
+  ></app-search-component>
+
+  <style>
+    ::ng-deep .custom-dropdown .p-dropdown-label {
+      padding: 0.75rem 1rem;
+    }
+    ::ng-deep .custom-dropdown .p-dropdown {
+      border-radius: 0.75rem;
+    }
+    ::ng-deep .p-paginator {
+      background: transparent;
+      border: none;
+      margin-top: 1rem;
+    }
+    ::ng-deep .p-paginator .p-paginator-pages .p-paginator-page.p-highlight {
+      background: #2563eb;
+      border-color: #2563eb;
+      color: #fff;
+    }
+    ::ng-deep
+      .p-paginator
+      .p-paginator-pages
+      .p-paginator-page:not(.p-highlight):hover {
+      background: #dbeafe;
+    }
+    ::ng-deep .p-table .p-datatable-header {
+      background: transparent;
+      border: none;
+      padding: 0;
+    }
+    ::ng-deep .p-datatable .p-datatable-tbody > tr {
+      background: white;
+      margin-bottom: 1rem;
+      border-radius: 1rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+        0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    ::ng-deep .p-datatable .p-datatable-tbody > tr > td {
+      border: none;
+      padding: 1.5rem;
+    }
+    ::ng-deep .p-button.p-button-outlined.p-button-secondary {
+      color: #3b82f6;
+      border-color: #3b82f6;
+    }
+    ::ng-deep .p-button.p-button-outlined.p-button-secondary:hover {
+      background: rgba(59, 130, 246, 0.04);
+    }
+    ::ng-deep .p-button.p-button-outlined.p-button-secondary:enabled:active {
+      background: rgba(59, 130, 246, 0.16);
+    }
+  </style>
+
+  <!-- Password Table -->
+  <div class="space-y-6 mt-6">
+    @if (loading) {
+    <div class="loader"></div>
+    } @else if (receivedPasswords.length > 0) {
+    <p-table
+      #tb
+      [value]="filteredList"
+      [paginator]="true"
+      [rows]="5"
+      [rowsPerPageOptions]="[5, 10, 20]"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+      styleClass="p-datatable-striped p-datatable-gridlines"
+      [tableStyle]="{ 'min-width': '100%' }"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th class="text-left pl-6" style="width: 20%">Website & Username</th>
+          <th class="text-center" style="width: 20%">
+            <div class="flex justify-center w-full">Actions</div>
+          </th>
+          <th class="text-center" style="width: 20%">Shared By</th>
+          <th class="text-center" style="width: 20%">Days Remaining</th>
+          <th class="text-right pr-6" style="width: 20%">View</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-password>
+        <tr class="hover:shadow-xl transition-shadow duration-300 ease-in-out">
+          <!-- Website + Username -->
+          <td>
+            <div class="flex items-center space-x-4">
+              <img
+                [src]="
+                  'https://img.logo.dev/' +
+                  getDomainFromUrl(password.website).pathname
+                "
+                alt="{{ password.website }} logo"
+                class="w-10 h-10 rounded-md"
+              />
+              <div>
+                <div class="font-semibold text-blue-800 text-xl">
+                  {{ getDomainFromUrl(password.website).hostname }}
+                </div>
+                <div class="text-base text-gray-500">
+                  {{ password.userName }}
+                </div>
+              </div>
+            </div>
+          </td>
+
+          <!-- Copy Password & Copy Email -->
+          <td>
+            <div class="flex items-center gap-4 justify-center">
+              <button
+                class="flex items-center p-2 text-sm text-gray-600 hover:text-blue-500"
+                (click)="copyField(password.password, 'password')"
+              >
+                <i class="pi pi-key text-lg mr-2"></i>Copy Password
+              </button>
+              <button
+                class="flex items-center p-2 text-sm text-gray-600 hover:text-blue-500"
+                (click)="copyField(password.email, 'email')"
+              >
+                <i class="pi pi-envelope text-lg mr-2"></i>Copy Email
+              </button>
+            </div>
+          </td>
+
+          <!-- Shared With -->
+          <td class="text-center text-gray-600 font-medium">
+            <span class="text-blue-600">{{ password.senderMail }}</span>
+          </td>
+
+          <!-- Days Remaining -->
+          <td class="text-center">
+            @if(password.expireDate) {
+            <span
+              class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+              [ngClass]="{
+                'bg-green-100 text-green-800':
+                  getDaysRemaining(password.expireDate) > 7,
+                'bg-yellow-100 text-yellow-800':
+                  getDaysRemaining(password.expireDate) > 0 &&
+                  getDaysRemaining(password.expireDate) <= 7,
+                'bg-red-100 text-red-800':
+                  getDaysRemaining(password.expireDate) <= 0
+              }"
+            >
+              {{
+                getDaysRemaining(password.expireDate) > 0
+                  ? getDaysRemaining(password.expireDate) + " days"
+                  : "Expired"
+              }}
+            </span>
+            } @else {
+            <span
+              class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800"
+            >
+              No expiry
+            </span>
+            }
+          </td>
+
+          <!-- View Details -->
+          <td>
+            <button
+              label="Manage Password"
+              (click)="managePassword(password._id)"
+              class="bg-blue-500 text-white p-2 rounded-md shadow-sm hover:shadow-md transition-all duration-200"
+            >
+              View Password
+            </button>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+    } @else {
+    <div
+      class="flex flex-col items-center justify-center text-center py-20 text-gray-500"
+    >
+      <div class="bg-blue-100 text-blue-600 p-6 rounded-full shadow-inner">
+        <i class="pi pi-inbox text-9xl"></i>
+      </div>
+      <h3 class="mt-6 text-xl font-semibold">No Shared Passwords Found</h3>
+      <p class="mt-2 text-sm text-gray-400 max-w-sm">
+        You haven't shared any passwords yet.
+      </p>
+    </div>
+    }
+  </div>
+</div>
