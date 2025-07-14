@@ -1,0 +1,288 @@
+<div class="p-2 space-y-6">
+  <!-- heading -->
+  <div
+    class="flex items-center justify-between border-l-8 border-blue-600 bg-white p-4 rounded-xl shadow-lg"
+  >
+    <div class="flex items-center space-x-4">
+      <div>
+        <h2 class="text-3xl font-bold text-blue-800">Recycle Bin</h2>
+        <p class="text-sm text-gray-500">
+          Restore or permanently delete old records
+        </p>
+      </div>
+    </div>
+
+    <!-- Delete All button -->
+    <button
+      pButton
+      label="Delete All"
+      (click)="deleteDialogVisible2 = true"
+      severity="danger"
+      [disabled]="deletedPasswords.length == 0"
+    ></button>
+  </div>
+
+  <!-- Search, Filter, Sort Controls -->
+  <app-search-component
+    [categoryOptions]="categoryOptions"
+    [sortOptions]="sortOptions"
+    [sortOption]="sortOption"
+    [data]="filteredDeletedPasswords"
+    (result)="filteredPasswords = $event"
+    [sortFun]="sortFn"
+    (sortChange)="onSortChange($event)"
+  ></app-search-component>
+
+  <style>
+    ::ng-deep .custom-dropdown .p-dropdown-label {
+      padding: 0.75rem 1rem;
+    }
+    ::ng-deep .custom-dropdown .p-dropdown {
+      border-radius: 0.75rem;
+    }
+    ::ng-deep .p-paginator {
+      background: transparent;
+      border: none;
+      margin-top: 1rem;
+    }
+    ::ng-deep .p-paginator .p-paginator-pages .p-paginator-page.p-highlight {
+      background: #2563eb;
+      border-color: #2563eb;
+      color: #fff;
+    }
+    ::ng-deep
+      .p-paginator
+      .p-paginator-pages
+      .p-paginator-page:not(.p-highlight):hover {
+      background: #dbeafe;
+    }
+    ::ng-deep .p-table .p-datatable-header {
+      background: transparent;
+      border: none;
+      padding: 0;
+    }
+    ::ng-deep .p-datatable .p-datatable-tbody > tr {
+      background: white;
+      margin-bottom: 1rem;
+      border-radius: 1rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+        0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    ::ng-deep .p-datatable .p-datatable-tbody > tr > td {
+      border: none;
+      padding: 1.5rem;
+    }
+  </style>
+
+  <!-- Password Table -->
+  <div class="space-y-6 mt-6">
+    @if (loading) {
+    <div class="loader"></div>
+    } @else if(filteredPasswords.length > 0) {
+    <p-table
+      [value]="filteredPasswords"
+      [paginator]="true"
+      [rows]="5"
+      [rowsPerPageOptions]="[5, 10, 20]"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+      styleClass="p-datatable-striped p-datatable-gridlines"
+      [tableStyle]="{ 'min-width': '100%' }"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th class="text-right pr-6" style="width: 25%">
+            <div class="w-full flex justify-center">Website & Username</div>
+          </th>
+          <th class="text-left" style="width: 25%">
+            <div class="text-left w-full flex justify-center">Email</div>
+          </th>
+          <th class="text-right pr-6" style="width: 25%">
+            <div class="w-full flex justify-center">Days Left</div>
+          </th>
+          <th class="text-right pl-3" style="width: 25%">
+            <div class="w-full flex justify-center">Actions</div>
+          </th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-password>
+        <tr class="hover:shadow-xl transition-shadow duration-300 ease-in-out">
+          <!-- Website + Username -->
+          <td class="pl-6">
+            <div class="flex items-center space-x-4 w-full">
+              <img
+                [src]="
+                  'https://img.logo.dev/' +
+                  getDomainFromUrl(password.website).pathname
+                "
+                alt="{{ password.website }} logo"
+                class="w-10 h-10 rounded-md"
+              />
+              <div class="min-w-0">
+                <div class="font-semibold text-blue-800 text-lg truncate">
+                  {{ getDomainFromUrl(password.website).hostname }}
+                </div>
+                <div class="text-sm text-gray-500 truncate">
+                  {{ password.userName }}
+                </div>
+              </div>
+            </div>
+          </td>
+
+          <!-- Email -->
+          <td>
+            <div
+              class="flex items-center text-gray-600 font-bold text-base min-w-0"
+            >
+              <span class="truncate">{{ password.email }}</span>
+            </div>
+          </td>
+
+          <!-- Days Remaining -->
+          <td>
+            <div class="flex justify-center">
+              <div
+                class="inline-flex items-center gap-2 px-3 py-1 text-sm font-semibold rounded-2xl shadow-sm border whitespace-nowrap"
+                [ngClass]="{
+                  'bg-green-100 text-green-700 border-green-300':
+                    password.daysLeft > 14,
+                  'bg-yellow-100 text-yellow-800 border-yellow-300':
+                    password.daysLeft <= 14 && password.daysLeft > 3,
+                  'bg-red-100 text-red-700 border-red-300':
+                    password.daysLeft <= 3
+                }"
+              >
+                <i class="pi pi-clock text-sm"></i>
+                {{ password.daysLeft }} days left
+              </div>
+            </div>
+          </td>
+
+          <!-- Actions -->
+          <td class="pr-6">
+            <div class="w-full flex justify-end space-x-3">
+              <button
+                pButton
+                label="Delete"
+                (click)="openDeleteDialog(password._id)"
+                severity="danger"
+                class="p-button-danger p-2 rounded-md shadow-sm hover:shadow-md transition-all duration-200 whitespace-nowrap"
+              ></button>
+              <button
+                pButton
+                label="Restore"
+                (click)="restorePassword(password)"
+                class="p-button-primary p-2 rounded-md shadow-sm hover:shadow-md transition-all duration-200 whitespace-nowrap"
+              ></button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+    } @else {
+    <div
+      class="flex flex-col items-center justify-center text-center py-20 text-gray-500"
+    >
+      <div class="bg-blue-100 text-blue-600 p-6 rounded-full shadow-inner">
+        <i class="pi pi-inbox text-9xl"></i>
+      </div>
+      <h3 class="mt-6 text-xl font-semibold">No Passwords Found</h3>
+      <p class="mt-2 text-sm text-gray-400 max-w-sm">
+        You haven't added any passwords yet. Click the
+        <strong class="text-blue-600">Add Password</strong>
+        button to get started.
+      </p>
+    </div>
+    }
+  </div>
+</div>
+
+<!-- Delete single password dialog -->
+<p-dialog
+  header="Confirm Deletion"
+  [(visible)]="deleteDialogVisible"
+  [modal]="true"
+  [closable]="false"
+  [dismissableMask]="true"
+  styleClass="rounded-xl"
+  class="w-[90vw] md:w-[30vw] max-w-[30rem] text-2xl"
+>
+  <div class="text-gray-700 text-lg leading-relaxed break-words">
+    Are you sure you want to
+    <strong class="text-red-600">permanently delete</strong> this password?
+    <br />
+    <span class="block mt-1">Once deleted, it can't be recovered.</span>
+  </div>
+
+  <div class="flex justify-end space-x-3 mt-6">
+    <button
+      pButton
+      label="Cancel"
+      (click)="cancelDelete()"
+      class="p-button-secondary"
+    ></button>
+    <button
+      pButton
+      label="Delete"
+      (click)="confirmDelete()"
+      class="p-button-danger"
+    ></button>
+  </div>
+</p-dialog>
+
+<!-- Delete all passwords dialog -->
+<p-dialog
+  header="Confirm Deletion of all Passwords"
+  [(visible)]="deleteDialogVisible2"
+  [modal]="true"
+  [closable]="false"
+  [dismissableMask]="true"
+  styleClass="rounded-xl"
+  class="w-[90vw] md:w-[30vw] max-w-[30rem] text-2xl"
+>
+  <div class="text-gray-700 text-lg leading-relaxed break-words">
+    Are you sure you want to
+    <strong class="text-red-600">permanently delete</strong> all passwords?
+    <br />
+    <span class="block mt-1">Once deleted, it can't be recovered.</span>
+  </div>
+
+  <div class="mt-4">
+    <label class="block text-lg font-medium text-gray-700 mb-1">
+      Type "confirm" to proceed:
+    </label>
+    <input
+      pInputText
+      type="text"
+      [(ngModel)]="deleteConfirmationText"
+      placeholder="Type 'confirm' here"
+      (input)="onConfirmationInput()"
+      class="w-full"
+      [ngClass]="{
+        'p-invalid': deleteConfirmationText && !isDeleteConfirmed
+      }"
+    />
+    @if (deleteConfirmationText && !isDeleteConfirmed) {
+    <small class="p-error block mt-1 text-red-500">
+      Please type <strong class="text-red-600"> "confirm" </strong> exactly to
+      proceed
+    </small>
+    }
+  </div>
+
+  <div class="flex justify-end space-x-3 mt-6">
+    <button
+      pButton
+      label="Cancel"
+      (click)="cancelDelete2()"
+      class="p-button-outlined p-button-secondary"
+    ></button>
+    <button
+      pButton
+      label="Delete All"
+      (click)="confirmDelete2()"
+      class="p-button-danger"
+      [disabled]="!isDeleteConfirmed"
+    ></button>
+  </div>
+</p-dialog>

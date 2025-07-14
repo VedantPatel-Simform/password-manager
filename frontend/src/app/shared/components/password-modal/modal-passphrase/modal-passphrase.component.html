@@ -1,0 +1,50 @@
+<div class="p-5 space-y-6 max-w-md w-full text-blue-900">
+    <!-- Passphrase Display -->
+    <div class="flex items-center gap-3">
+        <input type="text" [value]="generatedPassphrase" readonly
+            class="flex-1 px-3 py-2 border border-blue-300 rounded-md bg-blue-50 font-mono text-sm focus:outline-none" />
+        <div role="button" tabindex="0" (click)="copyPassphrase()"
+            class="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-all cursor-pointer flex items-center justify-center">
+            <i class="pi pi-copy mr-2"></i>
+            Copy
+        </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="grid grid-cols-1 gap-4">
+        <!-- Word Count -->
+        <div>
+            <label class="text-sm font-medium text-blue-700 mb-1 block">
+                Number of Words:
+                <span class="font-bold text-blue-900">{{ wordCount }}</span>
+            </label>
+            <p-slider [(ngModel)]="wordCount" [min]="2" [max]="12" [step]="1" (onSlideEnd)="generatePassphrase()"
+                styleClass="w-full"></p-slider>
+        </div>
+
+        <!-- Number Count -->
+        <div>
+            <label class="text-sm font-medium text-blue-700 mb-1 block">Number Count</label>
+            <input type="number" [(ngModel)]="numberCount" (change)="setNumberCount(numberCount)" min="0" max="10"
+                step="1"
+                class="w-full px-3 py-2 border border-blue-300 rounded-md focus:outline-none text-sm bg-blue-50" />
+        </div>
+
+        <!-- Separator -->
+        <div>
+            <label class="text-sm font-medium text-blue-700 mb-1 block">Separator</label>
+            <input type="text" [(ngModel)]="separator" maxlength="3" placeholder="e.g. -, _, *"
+                (input)="generatePassphrase()"
+                class="w-full px-3 py-2 border border-blue-300 rounded-md text-sm placeholder-blue-400 bg-blue-50 focus:outline-none" />
+        </div>
+    </div>
+
+    <!-- Generate Button -->
+    <div class="">
+        <div role="button" tabindex="0" (click)="generatePassphrase()"
+            class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md transition-all text-md text-center cursor-pointer flex items-center justify-center">
+            <i class="pi pi-refresh mr-2"></i>
+            Generate
+        </div>
+    </div>
+</div>
