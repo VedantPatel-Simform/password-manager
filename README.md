@@ -148,7 +148,6 @@ JWT_EXPIRE_TIME=1d
 NODE_ENV=development
 MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/dbname
 CORS_ORIGIN=https://your-frontend-domain.com
-PASSWORD_BREACH_ENDPOINT=https://api.pwnedpasswords.com/range/
 AUTO_DELETE_AFTER_SECONDS=2592000  # 30 days in seconds
 ```
 
