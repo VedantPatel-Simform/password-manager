@@ -252,9 +252,8 @@ export const deleteAllPasswordsController = expressAsyncHandler(
         const result = await Password.deleteMany({
             userId: userId,
             // remove the below comment after testing
-            // deleted: true,
+            deleted: true,
         });
-
         res.status(200).json({
             success: true,
             message: `Successfully deleted ${result.deletedCount} passwords`,

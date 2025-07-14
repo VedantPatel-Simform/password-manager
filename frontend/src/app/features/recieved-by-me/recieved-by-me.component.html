@@ -25,8 +25,8 @@
 
   <app-search-component
     [categoryOptions]="categoryOptions"
-    [data]="sharedPasswords"
-    [filterKey]="'receiverMail'"
+    [data]="receivedPasswords"
+    [filterKey]="'senderMail'"
     [sortOptions]="sortOptions"
     [sortOption]="sortOption"
     [sortFun]="sortFn"
@@ -89,7 +89,7 @@
   <div class="space-y-6 mt-6">
     @if (loading) {
     <div class="loader"></div>
-    } @else if (filteredList.length > 0) {
+    } @else if (receivedPasswords.length > 0) {
     <p-table
       #tb
       [value]="filteredList"
@@ -103,12 +103,13 @@
     >
       <ng-template pTemplate="header">
         <tr>
-          <th class="text-left pl-6" style="width: 25%">Website & Username</th>
-          <th class="text-center" style="width: 25%">
+          <th class="text-left pl-6" style="width: 20%">Website & Username</th>
+          <th class="text-center" style="width: 20%">
             <div class="flex justify-center w-full">Actions</div>
           </th>
-          <th class="text-center" style="width: 25%">Shared By</th>
-          <th class="text-right pr-6" style="width: 25%">Manage</th>
+          <th class="text-center" style="width: 20%">Shared By</th>
+          <th class="text-center" style="width: 20%">Days Remaining</th>
+          <th class="text-right pr-6" style="width: 20%">View</th>
         </tr>
       </ng-template>
       <ng-template pTemplate="body" let-password>
@@ -155,7 +156,37 @@
 
           <!-- Shared With -->
           <td class="text-center text-gray-600 font-medium">
-            <span class="text-blue-600">{{ password.receiverMail }}</span>
+            <span class="text-blue-600">{{ password.senderMail }}</span>
+          </td>
+
+          <!-- Days Remaining -->
+          <td class="text-center">
+            @if(password.expireDate) {
+            <span
+              class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+              [ngClass]="{
+                'bg-green-100 text-green-800':
+                  getDaysRemaining(password.expireDate) > 7,
+                'bg-yellow-100 text-yellow-800':
+                  getDaysRemaining(password.expireDate) > 0 &&
+                  getDaysRemaining(password.expireDate) <= 7,
+                'bg-red-100 text-red-800':
+                  getDaysRemaining(password.expireDate) <= 0
+              }"
+            >
+              {{
+                getDaysRemaining(password.expireDate) > 0
+                  ? getDaysRemaining(password.expireDate) + " days"
+                  : "Expired"
+              }}
+            </span>
+            } @else {
+            <span
+              class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800"
+            >
+              No expiry
+            </span>
+            }
           </td>
 
           <!-- View Details -->
@@ -165,7 +196,7 @@
               (click)="managePassword(password._id)"
               class="bg-blue-500 text-white p-2 rounded-md shadow-sm hover:shadow-md transition-all duration-200"
             >
-              Manage Password
+              View Password
             </button>
           </td>
         </tr>

@@ -44,7 +44,7 @@ export class SearchComponentComponent implements DoCheck {
   @Input() sortOptions: { value: string; label: string }[] = [];
   @Input() sortOption: string = '';
   @Input() data: InputData = [];
-  @Input() filterKey: 'category' | 'receiverMail' = 'category';
+  @Input() filterKey: 'category' | 'receiverMail' | 'senderMail' = 'category';
   @Input() sortFun!:
     | PasswordSortFn<DeletedPassword>
     | PasswordSortFn<DecryptedPassword>;
@@ -58,7 +58,7 @@ export class SearchComponentComponent implements DoCheck {
 
   private filteredPasswords(): void {
     let filtered = [...this.data];
-
+    console.log('cate opns in ', this.categoryOptions);
     // Filter by selected value
     if (this.selectedFilteredValue !== 'all') {
       filtered = filtered.filter((item) => {

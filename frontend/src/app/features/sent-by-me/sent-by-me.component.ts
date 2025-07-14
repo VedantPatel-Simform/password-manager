@@ -169,6 +169,10 @@ export class SentByMeComponent implements OnInit {
   }
 
   managePassword(id: string) {
-    this.router.navigate(['dashboard/shared/manage', id]);
+    this.router.navigate(['dashboard/shared/manage', id], {
+      state: {
+        sender: true,
+      },
+    });
   }
 }
