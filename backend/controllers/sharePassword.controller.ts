@@ -67,6 +67,13 @@ export const addSharedPassword = expressAsyncHandler(
             expireDate,
             category,
         } = req.body;
+
+        if (receiverMail === req.user.email) {
+            throw new ApiError(
+                'You can not send password to yourself',
+                HTTP_STATUS.BAD_REQUEST.code
+            );
+        }
         const receiver = await User.findOne({ email: receiverMail });
         if (!receiver) {
             throw new ApiError(
