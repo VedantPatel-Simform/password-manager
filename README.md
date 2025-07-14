@@ -133,7 +133,7 @@ This password manager implements a **zero-knowledge architecture**, ensuring tha
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-org/password-manager.git
+git clone https://github.com/VedantPatel-Simform/password-manager.git
 cd password-manager
 ```
 
