@@ -6,23 +6,23 @@
     <div class="flex items-center space-x-4">
       <div>
         <h2 class="text-3xl font-bold text-blue-800">Shared Passwords</h2>
-        <p class="text-sm text-gray-500">
-          View passwords shared with others or received from others.
-        </p>
+        <p class="text-sm text-gray-500">View passwords shared with you</p>
       </div>
     </div>
 
-    <!-- Export Button -->
-    <button
-      pButton
-      type="button"
-      icon="pi pi-file-excel"
-      label="Export to CSV"
-      (click)="exportToCsv()"
-      class="p-button-outlined p-button-secondary"
-      pTooltip="Export shared passwords to CSV"
-      tooltipPosition="left"
-    ></button>
+    <div class="flex items-center space-x-2">
+      <!-- Refresh Button -->
+      <button
+        pButton
+        type="button"
+        icon="pi pi-refresh"
+        label="Refresh"
+        (click)="getPasswords()"
+        class="p-button-outlined p-button-secondary"
+        pTooltip="Refresh shared passwords"
+        tooltipPosition="left"
+      ></button>
+    </div>
   </div>
 
   <app-search-component
@@ -93,7 +93,7 @@
     <div class="loader"></div>
     } @else if (filteredList.length > 0) {
     <p-table
-      #tb
+      #tble
       [value]="filteredList"
       [paginator]="true"
       [rows]="5"

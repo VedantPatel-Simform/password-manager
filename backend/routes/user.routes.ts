@@ -13,9 +13,16 @@ import { Router } from 'express';
 import { authHandler } from '../middlewares/authentication.middleware.js';
 import shareRouter from './passwordShare.routes.js';
 import receiveRouter from './passwordReceive.routes.js';
+import { passwordItemsArraySchema } from '../validators/password.validators.js';
+import { validate } from '../middlewares/zodValidator.middleware.js';
 const router = Router();
 
-router.post('/password/add', authHandler, addPasswordsController);
+router.post(
+    '/password/add',
+    authHandler,
+    validate(passwordItemsArraySchema),
+    addPasswordsController
+);
 router.delete(
     '/password/delete/:passwordId',
     authHandler,

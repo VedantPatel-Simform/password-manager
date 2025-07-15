@@ -183,12 +183,13 @@ export const editPassword = expressAsyncHandler(
 export const getReceivedByMePasswords = expressAsyncHandler(
     async (req: Request, res: Response) => {
         const { id } = req.user;
-        const SentByMePasswords = await SharedPasswords.find({
+        const ReceivedByMePasswords = await SharedPasswords.find({
             receiverId: id,
+            expireDate: { $gt: new Date() },
         });
         res.status(HTTP_STATUS.OK.code).json({
             success: true,
-            passwords: SentByMePasswords,
+            passwords: ReceivedByMePasswords,
         });
     }
 );

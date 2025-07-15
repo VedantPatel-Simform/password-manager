@@ -10,17 +10,19 @@
       </div>
     </div>
 
-    <!-- Export Button -->
-    <button
-      pButton
-      type="button"
-      icon="pi pi-file-excel"
-      label="Export to CSV"
-      (click)="exportToCsv()"
-      class="p-button-outlined p-button-secondary"
-      pTooltip="Export shared passwords to CSV"
-      tooltipPosition="left"
-    ></button>
+    <div class="flex items-center space-x-2">
+      <!-- Refresh Button -->
+      <button
+        pButton
+        type="button"
+        icon="pi pi-refresh"
+        label="Refresh"
+        (click)="getPasswords()"
+        class="p-button-outlined p-button-secondary"
+        pTooltip="Refresh shared passwords"
+        tooltipPosition="left"
+      ></button>
+    </div>
   </div>
 
   <app-search-component
