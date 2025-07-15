@@ -13,7 +13,7 @@ This password manager implements a **zero-knowledge architecture**, ensuring tha
 3. **Salt-based Protection** – Random salt stored in the database, combined with master password for key derivation
 4. **Client-side Decryption** – All decryption happens in your browser using keys stored only in memory. The server can never access your encryption keys.
 
-> **Encryption Algorithm**: AES-256-GCM (provides both confidentiality and authentication)
+> **Encryption Algorithm**: AES-256-GCM (provides both confidentiality and authentication)  
 > **Crypto Implementation**: Web Crypto API for fast, secure client-side operations
 
 ---
@@ -40,6 +40,46 @@ This password manager implements a **zero-knowledge architecture**, ensuring tha
 - Argon2id (Password hashing)
 - Client-side encryption/decryption
 - Zero-knowledge architecture
+
+---
+
+## Project Structure
+
+### Frontend
+
+```
+frontend
+├── public
+└── src
+    └── app
+        ├── core
+        │   ├── constants
+        │   ├── guards
+        │   ├── interceptors
+        │   └── services
+        ├── features
+        ├── shared
+        │   ├── classes
+        │   ├── components
+        │   ├── interfaces
+        │   └── validators
+        └── utils
+```
+
+### Backend
+
+```
+backend
+├── configs
+├── constants
+├── controllers
+├── interfaces
+├── middlewares
+├── models
+├── routes
+├── utils
+└── validators
+```
 
 ---
 
@@ -150,8 +190,6 @@ MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/dbname
 CORS_ORIGIN=https://your-frontend-domain.com
 AUTO_DELETE_AFTER_SECONDS=2592000  # 30 days in seconds
 ```
-
----
 
 ### 3. Start the Application
 
