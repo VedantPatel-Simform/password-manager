@@ -47,16 +47,19 @@ export class SentByMeComponent implements OnInit {
   sortOption = 'created_desc';
   sortOptions = sortOptions;
   sortFn: PasswordSortFn<DecryptedPassword> = sortByDateDesc;
-  @ViewChild('tb') tableEl: Table | null = null;
+  @ViewChild('tble') tableEl: Table | null = null;
   router = inject(Router);
 
   categoryOptionList = signal<{ label: string; value: string }[]>([]);
-  ngOnInit(): void {
+  getPasswords() {
     this.sharedPasswordService.getSentByMePasswords().subscribe({
       next: (res) => {
         this.sharedPasswordService.setPasswords(res.passwords);
       },
     });
+  }
+  ngOnInit(): void {
+    this.getPasswords();
     this.$sharedPasswordObs.subscribe({
       next: (res) => {
         const decryptSharedPasswords = res.map(
@@ -163,6 +166,7 @@ export class SentByMeComponent implements OnInit {
   }
   exportToCsv() {
     if (this.tableEl) {
+      console.log('exporting');
       this.tableEl.exportCSV();
       this.toastService.showSuccess('Success', 'Exported to csv');
     }

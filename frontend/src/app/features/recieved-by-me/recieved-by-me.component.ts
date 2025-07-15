@@ -186,6 +186,7 @@ export class ReceivedByMeComponent implements OnInit {
   }
   exportToCsv() {
     if (this.tableEl) {
+      console.log('exporting');
       this.tableEl.exportCSV();
       this.toastService.showSuccess('Success', 'Exported to csv');
     }
